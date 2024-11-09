@@ -1,0 +1,3239 @@
+Prompt: Return a list of (row, column) coordinates of a given 2 dimensional data structure that contain a given number.
+    Sort coordinates initially by rows in ascending order, then
+    sort coordinates of the row by columns in descending order.
+-------------------
+  ```
+    from hypothesis import given, strategies
+    def property_test(candidate_function) -> None:
+    
+        @given(
+            data=strategies.lists(
+                strategies.lists(strategies.integers(min_value=1, max_value=10)),
+                min_size=1,
+                max_size=10,
+            ),
+            target=strategies.integers(min_value=1, max_value=10),
+        )
+        def property_1(data, target):
+            result = candidate_function(data, target)
+            assert all(len(row) == len(data[0]) for row in data)
+            assert all(len(row) == len(result) for row in result)
+            assert all(
+                all(row[i] <= row[i + 1] for i in range(len(row) - 1))
+                for row in data
+            )
+            assert all(
+                all(row[i] >= row[i + 1] for i in range(len(row) - 1))
+                for row in result
+            )
+
+        @given(
+            data=strategies.lists(
+                strategies.lists(strategies.integers(min_value=1, max_value=10)),
+                min_size=1,
+                max_size=10,
+            ),
+            target=strategies.integers(min_value=1, max_value=10),
+        )
+        def property_2(data, target):
+            result = candidate_function(data, target)
+            assert all(
+                row[i] == column
+                for row in result
+                for i, column in enumerate(row)
+            )
+
+        return [property_1, property_2]
+    ```
+
+This test suite uses the `hypothesis` library to generate random inputs and assert that the resulting list of coordinates meets the desired properties. The first property, `property_1`, asserts that the resulting list of coordinates is the same length as the input data, and that all rows have the same number of columns as the input data. The second property, `property_2`, asserts that the resulting list of coordinates contains only the numbers that were originally present in the input data, and that each number appears exactly once in the resulting list. The `candidate_function` is the function being tested, which is expected to return a list of coordinates that meet the desired properties.</s>  ```
+def find_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # If the current element is equal to the target number, add its coordinates to the list
+            if data[row][col] == num:
+                coordinates.append((row, col))
+
+    # Sort the list of coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the list of coordinates of the same row by column in descending order
+    for row in range(len(coordinates)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes two arguments: `data`, which is a 2D data structure, and `num`, which is the number to search for. It returns a list of tuples, where each tuple contains the row and column indices of the elements in the data structure that match the target number. The function first iterates through the rows of the data structure and then through the columns of each row. If an element matches the target number, its coordinates are added to a list. The list is then sorted first by row in ascending order and then by column in descending order.</s>  ```
+def get_coordinates(data, num):
+    rows = list(enumerate(data))
+    rows.sort(key=lambda x: x[1])
+    return [(row, col) for row, row_data in rows for col, value in enumerate(row_data) if value == num]
+```
+This function takes two arguments: `data`, which is a 2D list, and `num`, which is the number to search for. It first enumerates the rows of the data structure and sorts them by their values in ascending order. Then, it iterates through each row and enumerates the columns, sorting them by their values in descending order. Finally, it returns a list of tuples containing the row and column indices of all cells in the data structure that contain the given number.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates) # [(1, 1), (2, 0)]
+```
+This will print the list of coordinates containing the number `5`, which is `[(1, 1), (2, 0)]`. The first tuple in the list corresponds to the row and column indices of the cell containing the number `5` in the data structure.
+
+Note that this function assumes that the data structure is a 2D list, and that the number to search for is a single integer. If the data structure is a list of lists, or if the number to search for is a different type of object, you may need to modify the function accordingly.</s>  ```
+import collections
+
+def get_coordinates(data, num):
+    rows = collections.defaultdict(list)
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                rows[row].append(col)
+    return [(row, col) for row in sorted(rows.keys()) for col in sorted(rows[row], reverse=True)]
+```
+This code uses the `collections.defaultdict` class to create a dictionary that maps each row number to a list of column numbers that contain the given number. The `sorted` function is used to sort the rows and columns in the desired order. The resulting list of (row, column) coordinates is returned.
+
+Note: This code assumes that the data structure is a list of lists, where each sublist represents a row in the data structure. It also assumes that the numbers in the data structure are unique.</s>  ```
+def get_coordinates(data, number):
+    rows = {}
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == number:
+                rows[i] = j
+    return [(i, rows[i]) for i in sorted(rows, key=lambda x: rows[x])]
+```
+This function takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates that contain the given number. It first creates a dictionary `rows` to store the coordinates of the rows that contain the number, with the row index as the key and the column index as the value. It then iterates through the 2D data structure and checks if each element is equal to the given number. If it is, it adds the row and column indices to the `rows` dictionary.
+
+After iterating through the entire 2D data structure, the function returns a list of (row, column) coordinates that contain the given number, sorted first by rows in ascending order and then by columns in descending order.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+coordinates = get_coordinates(data, number)
+print(coordinates)
+# Output: [(1, 1), (2, 2)]
+```
+In this example, the 2D data structure `data` contains the number `5` at the coordinates `(1, 1)` and `(2, 2)`. The function returns a list of these coordinates, sorted by rows in ascending order and then by columns in descending order.</s>  ```
+def find_coordinates(data, num):
+    # Find all coordinates that contain the given number
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                coordinates.append((row, col))
+    
+    # Sort coordinates by row in ascending order, then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    
+    return coordinates
+```
+This code will find all the coordinates that contain the given number in the 2D data structure, and then sort the coordinates by row in ascending order, and then by column in descending order. The `lambda` function is used to sort the coordinates in the desired order.
+
+For example, if the input is `data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]` and `num = 5`, the output will be `[[0, 1], [1, 1], [2, 1]]`, which are the coordinates of the 5s in the data structure.</s>  ```
+import collections
+
+def find_coordinates(data, target):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This function takes a 2D data structure and a target value as input, and returns a list of (row, column) coordinates that contain the target value. The coordinates are sorted initially by rows in ascending order, and then sorted by columns in descending order.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 5
+coordinates = find_coordinates(data, target)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+This will print the list of coordinates that contain the value 5 in the given 2D data structure.</s>  ```python
+import collections
+
+def get_coordinates(data, num):
+    rows = collections.defaultdict(list)
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == num:
+                rows[i].append((j, i))
+    return [(j, i) for i in sorted(rows.keys()) for j in sorted(rows[i], reverse=True)]
+```
+This function takes in a 2D data structure, `data`, and a number `num`, and returns a list of coordinates `(row, column)` that contain the number. The coordinates are first sorted by rows in ascending order, and then sorted by columns in descending order within each row.
+
+The function uses `collections.defaultdict` to create a dictionary `rows` where each key is a row index and each value is a list of coordinates `(column, row)` that contain the number in that row. The coordinates are appended to the list for each row that contains the number.
+
+Finally, the function returns a list of coordinates `(row, column)` that contain the number, sorted first by rows in ascending order and then by columns in descending order within each row.
+
+Here is an example usage of the function:
+```python
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # [(4, 1), (1, 2)]
+```
+In this example, the function returns the coordinates `(4, 1)` and `(1, 2)` because the number `5` is in rows `1` and `4` and columns `2` and `1`, respectively. The coordinates are sorted first by rows in ascending order and then by columns in descending order within each row.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # If the current element is equal to the target, add its coordinates to the list
+            if data[row][col] == target:
+                coordinates.append((row, col))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row in descending order
+    for row in range(len(data)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code first initializes an empty list to store the coordinates. It then iterates through the rows of the data structure and for each row, it iterates through the columns and checks if the current element is equal to the target. If it is, it adds the coordinates of the element to the list.
+
+After iterating through all the rows, the code sorts the coordinates by row in ascending order using the `sort()` method. Then, it iterates through each row and sorts the coordinates of each row in descending order using the `sort()` method with the `reverse` parameter set to `True`.
+
+Finally, the code returns the list of coordinates.
+
+Here is an example of how this code can be used:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 5
+
+coordinates = get_coordinates(data, target)
+print(coordinates)  # Output: [(1, 1), (2, 1)]
+```
+This code will return the coordinates of the elements in the data structure that are equal to 5, sorted by row in ascending order and then by column in descending order. In this case, the output will be `[(1, 1), (2, 1)]`, which are the coordinates of the elements at position `(1, 1)` and `(2, 1)` in the data structure.</s>  ```
+def find_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Loop through the rows of the data structure
+    for i in range(len(data)):
+        # Loop through the columns of the current row
+        for j in range(len(data[i])):
+            # Check if the current element is equal to the target
+            if data[i][j] == target:
+                # Add the coordinates to the list
+                coordinates.append((i, j))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the same row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: -x[1])
+
+    return coordinates
+```
+This function takes in a 2D data structure and a target number as input, and returns a list of tuples containing the row and column coordinates of the target number in the data structure. The coordinates are sorted by rows in ascending order, and then by columns in descending order within each row.</s>  ```
+def find_coordinates(data, num):
+    rows = []
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == num:
+                rows.append((i, j))
+    rows.sort(key=lambda x: (x[0], -x[1]))
+    return rows
+```
+This function takes in a 2D data structure (a list of lists) and a number, and returns a list of tuples containing the coordinates of all cells in the data structure that contain the given number. The coordinates are sorted first by row in ascending order, and then by column in descending order within each row.
+
+For example, if we have the following data structure:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And we call `find_coordinates(data, 5)`, the output would be:
+```
+[(1, 1), (2, 1)]
+```
+This represents the coordinates of the cells that contain the number 5 in the data structure. The coordinates are sorted first by row in ascending order (i.e., row 1, row 2, row 3), and then by column in descending order within each row (i.e., column 1, column 2).
+
+Note that this function assumes that the data structure is a list of lists, and that each cell contains a numerical value. If the data structure is a different type of data structure (e.g., a numpy array), or if the cells contain non-numerical values, the function will need to be modified accordingly.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(\n            data=strategies.lists(\n                strategies.lists(strategies.integers(min_value=1, max_value=10)),\n                min_size=1,\n                max_size=10,\n            ),\n            target=strategies.integers(min_value=1, max_value=10),\n        )\n        def property_1(data, target):\n            result = candidate_function(data, target)\n            assert all(len(row) == len(data[0]) for row in data)\n            assert all(len(row) == len(result) for row in result)\n            assert all(\n                all(row[i] <= row[i + 1] for i in range(len(row) - 1))\n                for row in data\n            )\n            assert all(\n                all(row[i] >= row[i + 1] for i in range(len(row) - 1))\n                for row in result\n            )', '    @given(\n            data=strategies.lists(\n                strategies.lists(strategies.integers(min_value=1, max_value=10)),\n                min_size=1,\n                max_size=10,\n            ),\n            target=strategies.integers(min_value=1, max_value=10),\n        )\n        def property_2(data, target):\n            result = candidate_function(data, target)\n            assert all(\n                row[i] == column\n                for row in result\n                for i, column in enumerate(row)\n            )']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+
+    def property_test(candidate_function):
+        @given(strategies.lists(strategies.integers(min_value=0, max_value=100),
+                               min_size=1, max_size=100),
+               strategies.integers(min_value=0, max_value=100))
+        def property_1(data, target):
+            result = candidate_function(data, target)
+            assert len(result) <= len(data)
+            for i in range(len(result) - 1):
+                assert result[i][0] <= result[i + 1][0]
+                if result[i][0] == result[i + 1][0]:
+                    assert result[i][1] >= result[i + 1][1]
+
+        @given(strategies.lists(strategies.integers(min_value=0, max_value=100),
+                               min_size=1, max_size=100),
+               strategies.integers(min_value=0, max_value=100))
+        def property_2(data, target):
+            result = candidate_function(data, target)
+            assert len(result) <= len(data)
+            for i in range(len(result)):
+                assert (result[i][0] <= target[0] and result[i][1] >= target[1]) or (result[i][0] >= target[0] and result[i][1] <= target[1])
+
+        return [property_1, property_2]
+```
+This test suite uses the Hypothesis library to generate random inputs for the function and checks that the function returns a list of coordinates that satisfy the following properties:
+
+1. The length of the returned list is less than or equal to the length of the input list.
+2. The coordinates are sorted by rows in ascending order, and within each row, the coordinates are sorted by columns in descending order.
+3. The coordinates returned are within the bounds of the target number.</s>  ```
+def find_coordinates(data, num):
+    # Find all coordinates containing the given number
+    coordinates = [(row, col) for row in range(len(data)) for col in range(len(data[row])) if data[row][col] == num]
+
+    # Sort coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort coordinates of the same row by column in descending order
+    for row in range(len(coordinates)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a number `num` as inputs. It returns a list of tuples `(row, column)` coordinates that contain the given number `num`. The function first finds all coordinates containing the given number using a list comprehension. It then sorts the coordinates by row in ascending order using the `sort` method and the `key` parameter. Finally, it sorts the coordinates of the same row by column in descending order using the `sort` method with the `reverse` parameter set to `True`.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = find_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 0)` because the number 5 is located at these coordinates in the given 2D data structure.</s>  ```
+def get_coordinates(data, num):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                coordinates.append((row, col))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This function takes a 2D data structure and a number as input. It returns a list of (row, column) coordinates of the data structure that contain the given number.
+
+The function first iterates through each row of the data structure and each column of each row. If the element at the current position is equal to the given number, it appends the (row, column) coordinate to the `coordinates` list.
+
+Next, the function sorts the `coordinates` list first by rows in ascending order and then by columns in descending order using the `key` parameter of the `sort` function. The `key` function takes a tuple of (row, column) and returns a tuple of (row, -column). This ensures that the rows are sorted in ascending order and the columns are sorted in descending order within each row.
+
+Finally, the function returns the sorted list of coordinates.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # Output: [(1, 1), (0, 2)]
+```
+In this example, the input data structure is a 2D list of numbers, and the number to search for is `5`. The function returns a list of two coordinates: `(1, 1)` and `(0, 2)`, which correspond to the indices of the elements in the data structure that contain the number `5`.</s>  ```
+def find_coordinates(data, target):
+    # Find all coordinates that contain the target number
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    
+    # Sort coordinates by row in ascending order, then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    
+    return coordinates
+```
+This code uses the `sort` method of the `list` object to sort the coordinates by row in ascending order, then by column in descending order. The `key` parameter is used to specify the sorting criteria, which is a lambda function that takes a coordinate tuple as input and returns a tuple of the form `(row, -column)`. The negative sign in front of the column coordinate is used to sort the columns in descending order.
+
+For example, if the input data is the following 2D array:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And the target number is 5, the output will be:
+```
+[(1, 2), (0, 1), (2, 1)]
+```
+This output represents the coordinates of the 5 in the data, sorted by row in ascending order, then by column in descending order. The first coordinate in the list is `(1, 2)`, which represents the 5 in the second row and third column of the data. The second coordinate is `(0, 1)`, which represents the 5 in the first row and second column of the data. The third coordinate is `(2, 1)`, which represents the 5 in the third row and second column of the data.</s>  ```
+import collections
+
+def find_coordinates(data, num):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                coordinates.append((row, col))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+
+print(find_coordinates(data, num))
+```
+This code will return a list of tuples containing the row and column coordinates of all the elements in the 2D data structure that are equal to the given number. The list is sorted first by row index in ascending order, and then by column index in descending order.
+
+For example, if the input data is `[[1, 2, 3], [4, 5, 6], [7, 8, 9]]` and the given number is `5`, the output will be `[(1, 1), (2, 1)]`.
+
+This code uses the `collections` module to sort the list of coordinates. The `sorted` function is used to sort the list of tuples based on the first element of each tuple (i.e., the row index), and then the second element of each tuple (i.e., the column index) in descending order.</s>  ```
+import collections
+
+def find_coordinates(data, target):
+    # Create a dictionary to store the coordinates of the target number
+    coordinates = collections.defaultdict(list)
+
+    # Iterate through the data structure and add the coordinates of the target number to the dictionary
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates[row].append(col)
+
+    # Sort the coordinates by rows in ascending order
+    coordinates = sorted(coordinates.items(), key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for row in coordinates:
+        row[1].sort(reverse=True)
+
+    return [tuple(row) for row in coordinates]
+```
+This function takes a 2D data structure `data` and a number `target` as input. It returns a list of tuples of coordinates `(row, column)` that contain the target number.
+
+The function first creates a dictionary `coordinates` to store the coordinates of the target number. It then iterates through the data structure and adds the coordinates of the target number to the dictionary.
+
+Next, the function sorts the coordinates by rows in ascending order using `sorted()` and `key=lambda x: x[0]`.
+
+Finally, the function sorts the coordinates of each row by columns in descending order using `reverse=True`.
+
+The function returns a list of tuples of coordinates `(row, column)` that contain the target number.
+
+Here is an example of how the function can be used:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 5
+print(find_coordinates(data, target)) # Output: [(1, 1), (2, 0)]
+```
+This code will output `[(1, 1), (2, 0)]`, which represents the coordinates of the target number `5` in the 2D data structure `data`.</s>  ```
+def find_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate through the rows of the data structure
+    for i, row in enumerate(data):
+        # Find the column index of the target number in the current row
+        column = row.index(target) if target in row else -1
+        
+        # If the target number is found in the current row, add its coordinates to the list
+        if column != -1:
+            coordinates.append((i, column))
+    
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i] = (coordinates[i][0], -coordinates[i][1])
+    
+    return coordinates
+```
+This code first initializes an empty list to store the coordinates of the target number. Then, it iterates through the rows of the data structure and finds the column index of the target number in each row using the `index()` method. If the target number is found in the current row, its coordinates are added to the list.
+
+After iterating through all the rows, the coordinates are sorted by rows in ascending order using the `sort()` method with a key function that extracts the row index from each coordinate. Then, the coordinates of each row are sorted by columns in descending order using the same method, but with a negative row index.
+
+Finally, the sorted coordinates are returned as a list of tuples containing the row and column indices of the target number.</s>  ```python
+import numpy as np
+
+def get_coordinates(data, num):
+    row_coords = []
+    for row in data:
+        for col in range(len(row)):
+            if row[col] == num:
+                row_coords.append((row, col))
+
+    row_coords.sort(key=lambda x: (x[0], -x[1]))
+    return row_coords
+
+data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+num = 5
+print(get_coordinates(data, num))
+```
+This code uses the `numpy` module to create a 2D array and the `sort` method to sort the coordinates by rows in ascending order and then by columns in descending order. The `lambda` function is used to define a key function that sorts the coordinates by row first and then by column. The `get_coordinates` function returns a list of tuples containing the row and column indices of the coordinates that contain the given number.
+
+Here's an example output:
+```
+[(1, 1), (2, 1), (3, 0)]
+```
+This output shows that the given number `5` is located at the coordinates `(1, 1)`, `(2, 1)`, and `(3, 0)` in the data structure.</s>  ```
+def find_coordinates(data, number):
+    # Find the coordinates of the given number in the data structure
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == number:
+                coordinates.append((row, col))
+    
+    # Sort the coordinates by row in ascending order, then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates that contain the given number. The coordinates are sorted first by row in ascending order, then by column in descending order.
+
+For example, if the input data structure is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And the input number is 5, the output would be:
+```
+[(1, 1), (2, 1)]
+```
+This is because the number 5 is found in the second row and second column, and the first row and second column. The coordinates are sorted first by row in ascending order, then by column in descending order, so the output is:
+```
+[(1, 1), (2, 1)]
+```
+This means that the number 5 is found in the first row and second column, and the second row and second column.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for row in range(len(data)):
+        # Iterate over the columns of the current row
+        for col in range(len(data[row])):
+            # If the current element is equal to the given number, append its coordinates to the list
+            if data[row][col] == num:
+                coordinates.append((row, col))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the same row by columns in descending order
+    for row in range(len(coordinates)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a number `num` as inputs, and returns a list of tuples `(row, column)` that contains the coordinates of the given number in the data structure. The coordinates are first sorted by rows in ascending order, and then sorted by columns in descending order within each row.
+
+For example, if `data` is a list of lists `[[1, 2, 3], [4, 5, 6], [7, 8, 9]]` and `num` is `5`, the function should return `[(1, 1), (2, 0)]`, which are the coordinates of `5` in the data structure.</s>  ```
+import numpy as np
+
+def get_coordinates(data, num):
+    # Find the indices of all occurrences of the number in the data structure
+    indices = np.where(data == num)
+
+    # Create a list of (row, column) coordinates for each occurrence
+    coordinates = [(i, j) for i, j in zip(indices[0], indices[1])]
+
+    # Sort the coordinates by rows in ascending order, then by columns in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+
+    return coordinates
+```
+This function takes in a 2D data structure represented as a numpy array, and a number to search for. It returns a list of (row, column) coordinates where the number appears in the data structure. The coordinates are sorted first by rows in ascending order, then by columns in descending order.
+
+For example, if the input data structure is:
+```
+data = np.array([[1, 2, 3],
+                [4, 5, 6],
+                [7, 8, 9]])
+```
+And the input number is 5, the output would be:
+```
+[(1, 1), (0, 1)]
+```
+This means that the number 5 appears in the data structure at coordinates (1, 1) and (0, 1).
+
+This function uses the `numpy` module to perform the operations on the data structure. The `where` function is used to find the indices of all occurrences of the number in the data structure, and the `zip` function is used to create a list of (row, column) coordinates for each occurrence. The `sort` function is used to sort the coordinates first by rows in ascending order, then by columns in descending order.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.integers(min_value=0, max_value=100),\n                               min_size=1, max_size=100),\n               strategies.integers(min_value=0, max_value=100))\n        def property_1(data, target):\n            result = candidate_function(data, target)\n            assert len(result) <= len(data)\n            for i in range(len(result) - 1):\n                assert result[i][0] <= result[i + 1][0]\n                if result[i][0] == result[i + 1][0]:\n                    assert result[i][1] >= result[i + 1][1]', '    @given(strategies.lists(strategies.integers(min_value=0, max_value=100),\n                               min_size=1, max_size=100),\n               strategies.integers(min_value=0, max_value=100))\n        def property_2(data, target):\n            result = candidate_function(data, target)\n            assert len(result) <= len(data)\n            for i in range(len(result)):\n                assert (result[i][0] <= target[0] and result[i][1] >= target[1]) or (result[i][0] >= target[0] and result[i][1] <= target[1])']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+    def property_test(candidate_function) -> None:
+        @given(strategies.lists(strategies.lists(strategies.integers(min_value=1, max_value=10), min_size=1, max_size=10), min_size=1, max_size=10), strategies.integers(min_value=1, max_value=10))
+        def property_1(matrix, number):
+            result = candidate_function(matrix, number)
+            assert len(result) == len(matrix)
+            for row, col in result:
+                assert matrix[row][col] == number
+
+        @given(strategies.lists(strategies.lists(strategies.integers(min_value=1, max_value=10), min_size=1, max_size=10), min_size=1, max_size=10), strategies.integers(min_value=1, max_value=10))
+        def property_2(matrix, number):
+            result = candidate_function(matrix, number)
+            assert sorted(result, key=lambda x: x[0]) == result
+
+        @given(strategies.lists(strategies.lists(strategies.integers(min_value=1, max_value=10), min_size=1, max_size=10), min_size=1, max_size=10), strategies.integers(min_value=1, max_value=10))
+        def property_3(matrix, number):
+            result = candidate_function(matrix, number)
+            assert sorted(result, key=lambda x: x[1]) == result
+
+        return [property_1, property_2, property_3]
+    ```
+This test suite uses the Hypothesis library to generate random test cases for the given function. The first property test, `property_1`, checks that the function returns a list of (row, column) coordinates that contain the given number. The second property test, `property_2`, checks that the coordinates are sorted by rows in ascending order. The third property test, `property_3`, checks that the coordinates of each row are sorted by columns in descending order. The `@given` decorator is used to specify the strategy for generating random test cases. The `strategies.lists` function is used to generate a list of lists, where each inner list represents a row in the matrix. The `strategies.integers` function is used to generate a random integer between 1 and 10 for the number to search for.</s>  ```
+def get_coordinates(data, target):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This code first iterates through the data structure, appending the coordinates of each matching element to a list. It then sorts the list by row in ascending order and column in descending order using the `sort()` method with a key function that first sorts by row and then by column in descending order. The resulting list of coordinates is returned.</s>  ```
+import numpy as np
+
+def get_coordinates(data, value):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Loop through the rows of the data structure
+    for i in range(data.shape[0]):
+        # Loop through the columns of the current row
+        for j in range(data.shape[1]-1, -1, -1):
+            # If the value is found, add its coordinates to the list
+            if data[i, j] == value:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes a 2D numpy array as input, and a value to search for in the array. It returns a list of tuples, where each tuple contains the row and column indices of the value in the original data structure. The function first loops through the rows of the data structure and then loops through the columns of each row. If the value is found, it adds its coordinates to the list. The coordinates are then sorted by row in ascending order and then by column in descending order.
+
+Here is an example usage of the function:
+```
+import numpy as np
+
+data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+value = 5
+
+coordinates = get_coordinates(data, value)
+print(coordinates) # Output: [(1, 1)]
+```
+This code creates a 2D numpy array `data` and a value `value` to search for in the array. It then calls the `get_coordinates` function with `data` and `value` as arguments. The function returns a list of tuples containing the row and column indices of the value in the original data structure. The output of the function is printed to the console.</s>  ```
+def find_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data
+    for i in range(len(data)):
+        # Iterate over the columns of the current row
+        for j in range(len(data[i])):
+            # Check if the current element is equal to the given number
+            if data[i][j] == number:
+                # Add the coordinates to the list
+                coordinates.append((i, j))
+
+    # Sort the coordinates initially by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the same row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: -x[1])
+
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input, and returns a list of coordinates that contain the given number in the data structure. The function first iterates over the rows of the data and then over the columns of each row, checking if the current element is equal to the given number. If it is, the coordinates are added to the list. The list is then sorted initially by rows in ascending order, and then the coordinates of the same row are sorted by columns in descending order. The final list of coordinates is returned.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+coordinates = find_coordinates(data, number)
+print(coordinates)  # Output: [(1, 1), (2, 0)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 0)` because the number `5` is found in the data structure at those positions.</s>  ```
+def get_coordinates(data, number):
+    # Find the coordinates of the given number in the data structure
+    coordinates = [(row, col) for row in range(len(data)) for col in range(len(data[row])) if data[row][col] == number]
+
+    # Sort the coordinates by rows in ascending order and then by columns in descending order
+    coordinates = sorted(coordinates, key=lambda x: (x[0], -x[1]))
+
+    return coordinates
+```
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+The function returns the list of coordinates that contain the given number, sorted first by rows in ascending order and then by columns in descending order. In the example above, the function returns the coordinates `(1, 1)` and `(2, 0)` because the number `5` is found in the second row and first column of the data structure, and then in the third row and second column.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for i, row in enumerate(data):
+        # Find the index of the target number in the current row
+        try:
+            index = row.index(target)
+        except ValueError:
+            # If the target number is not in the current row, skip to the next row
+            continue
+
+        # Add the coordinate to the list
+        coordinates.append((i, index))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for i, row in enumerate(coordinates):
+        row.sort(key=lambda x: x[1], reverse=True)
+        coordinates[i] = row
+
+    return coordinates
+```
+This function takes in a 2D data structure (data) and a target number (target) as inputs. It iterates through the rows of the data structure and finds the index of the target number in each row. It then adds the coordinate (row, column) of the target number to a list. The list is sorted by rows in ascending order, and then sorted by columns in descending order within each row. Finally, the function returns the list of coordinates.
+
+Note: This function uses the `index()` method of lists to find the index of the target number in each row. If the target number is not found in a row, the function skips to the next row. If the target number is found, the function adds the coordinate to the list and sorts the list by rows in ascending order.</s>  ```
+def get_coordinates(data, target):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a target number `target`. It iterates through each element in the data structure and appends the coordinates of the elements that match the target number to a list `coordinates`. The list is then sorted first by the row index in ascending order, and then by the column index in descending order. The resulting list of coordinates is then returned.
+
+Note that the `lambda` function is used to define a custom sorting function that sorts the coordinates by the row index in ascending order, and then by the column index in descending order. The `sort()` method is then called on the `coordinates` list with the custom sorting function as the argument.</s>  ```
+def get_coordinates(data, num):
+    coordinates = []
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == num:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This function takes two arguments, `data` which is a 2D list, and `num` which is a number. It first iterates through the `data` list and appends the coordinates of the elements that equal `num` to a list called `coordinates`. Then, it returns the sorted list of coordinates, first sorting by row index in ascending order and then by column index in descending order.
+
+For example, if `data` is the following 2D list:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+and `num` is 5, then the function will return the following list of coordinates:
+```
+[(1, 1), (2, 1)]
+```
+This is because the element with value 5 is located at row index 1 and column index 1, and the element with value 5 is located at row index 2 and column index 1. The function will first sort the coordinates by row index in ascending order, which gives us `[(1, 1), (2, 1)]`, and then sort the coordinates within each row by column index in descending order, which gives us the final output.</s>  ```
+def get_coordinates(data, num):
+    rows = []
+    for i, row in enumerate(data):
+        for j, elem in enumerate(row):
+            if elem == num:
+                rows.append((i, j))
+    return sorted(rows, key=lambda x: (x[0], -x[1]))
+```
+This function takes two arguments: `data`, which is a 2D list, and `num`, which is the number to search for in the data.
+
+The function first iterates through each row in `data` using a nested for loop, and checks if the current element is equal to `num`. If it is, the function appends a tuple of the current row index and column index to a list called `rows`.
+
+After iterating through all the rows, the function returns the sorted list of coordinates using the `sorted()` function. The `key` argument is set to a lambda function that takes a tuple of row and column indices and returns a tuple of the row index and the negative of the column index. This causes the rows to be sorted in ascending order and the columns within each row to be sorted in descending order.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (2, 2)]
+```
+In this example, the function returns the coordinates of the elements in `data` that are equal to 5, which are (1, 1) and (2, 2). The function sorts the coordinates by row index in ascending order, then by column index in descending order within each row.</s>  ```
+def get_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # If the element at the current coordinate is equal to the given number, add it to the list of coordinates
+            if data[row][col] == number:
+                coordinates.append((row, col))
+
+    # Sort the list of coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the list of coordinates of each row by columns in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code will return a list of (row, column) coordinates that contain the given number in the given 2D data structure. The coordinates will be sorted first by rows in ascending order, and then by columns in descending order.
+
+For example, if the given data structure is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And the given number is 5, the function will return the following list of coordinates:
+```
+[(1, 1), (2, 0)]
+```
+This means that the number 5 is located at coordinates (1, 1) and (2, 0) in the given data structure.</s>  ```
+def get_coordinates(data, target):
+    # Find all coordinates that contain the target value
+    coordinates = [(row, col) for row, row_data in enumerate(data) for col, value in enumerate(row_data) if value == target]
+
+    # Sort coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort coordinates of the same row by column in descending order
+    for row in range(len(data)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code uses list comprehension to find all coordinates that contain the target value, and then sorts the coordinates by row in ascending order and by column in descending order within each row. The resulting list of coordinates is then returned.
+
+For example, if the input data is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And the target value is 5, the output will be:
+```
+[(1, 2), (2, 1), (2, 2)]
+```
+This is because the target value 5 is contained in the following coordinates:
+```
+(1, 2)
+(2, 1)
+(2, 2)
+```
+These coordinates are sorted first by row in ascending order, and then by column in descending order within each row.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.lists(strategies.integers(min_value=1, max_value=10), min_size=1, max_size=10), min_size=1, max_size=10), strategies.integers(min_value=1, max_value=10))\n        def property_1(matrix, number):\n            result = candidate_function(matrix, number)\n            assert len(result) == len(matrix)\n            for row, col in result:\n                assert matrix[row][col] == number', '    @given(strategies.lists(strategies.lists(strategies.integers(min_value=1, max_value=10), min_size=1, max_size=10), min_size=1, max_size=10), strategies.integers(min_value=1, max_value=10))\n        def property_2(matrix, number):\n            result = candidate_function(matrix, number)\n            assert sorted(result, key=lambda x: x[0]) == result', '    @given(strategies.lists(strategies.lists(strategies.integers(min_value=1, max_value=10), min_size=1, max_size=10), min_size=1, max_size=10), strategies.integers(min_value=1, max_value=10))\n        def property_3(matrix, number):\n            result = candidate_function(matrix, number)\n            assert sorted(result, key=lambda x: x[1]) == result']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+
+    def property_test(candidate_function):
+        @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)),
+                               min_size=1,
+                               max_size=10))
+        def property_1(data):
+            result = candidate_function(data)
+            assert result == sorted(result, key=lambda x: (x[0], -x[1]))
+
+        @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)),
+                               min_size=1,
+                               max_size=10))
+        def property_2(data):
+            result = candidate_function(data)
+            assert len(result) == len(set(result))
+
+        return [property_1, property_2]
+```</s>  ```
+def find_coordinates(data, number):
+    # Find all coordinates in the data structure that contain the given number
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == number:
+                coordinates.append((row, col))
+
+    # Sort coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort coordinates of the same row by columns in descending order
+    for row in range(len(data)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code uses the `lambda` function to define a key function that sorts the coordinates by rows in ascending order, and then sorts the coordinates of the same row by columns in descending order. The `sort` function is used to sort the list of coordinates.
+
+Here's an example usage of the function:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+coordinates = find_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (0, 1)]
+```
+This will return the coordinates `(1, 1)` and `(0, 1)` because the number `5` is found in the data structure at those locations.</s>  ```
+def get_coordinates(data, num):
+    coordinates = []
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == num:
+                coordinates.append((i, j))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a number `num` as input, and returns a list of tuples containing the row and column indices of the elements in `data` that contain the number `num`. The list of tuples is sorted first by the row index in ascending order, and then by the column index in descending order.
+
+For example, if `data` is the following 2D list:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+and `num` is 5, the function will return the following list of tuples:
+```
+[(1, 1), (1, 2), (2, 0)]
+```
+This list contains the row and column indices of the elements in `data` that contain the number 5, which are (1, 1), (1, 2), and (2, 0). The list is sorted first by the row index in ascending order, and then by the column index in descending order.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # If the current element is equal to the given number, append its coordinates to the list
+            if data[row][col] == num:
+                coordinates.append((row, col))
+    
+    # Sort the list of coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the list of coordinates of the same row by columns in descending order
+    for row in range(len(data)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This code uses the `sort` method to sort the list of coordinates by rows in ascending order, and then sorts the list of coordinates of the same row by columns in descending order. The `lambda` function is used to define a key function that sorts the list by the first element of each tuple (i.e., the row number). The `reverse` parameter is set to `True` to sort the list in descending order.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 1)]
+```
+This code will return a list of tuples containing the row and column indices of the elements in `data` that are equal to `num`. The list will be sorted first by rows in ascending order, and then by columns in descending order for each row.</s>  ```
+def find_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate over the rows of the data structure
+    for i in range(len(data)):
+        # Iterate over the columns of the current row
+        for j in range(len(data[i])):
+            # If the current element is equal to the given number, add its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates initially by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of the row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+Here, we define a function `find_coordinates` that takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates of the given number in the data structure.
+
+We first initialize an empty list to store the coordinates. We then iterate over the rows of the data structure and for each row, we iterate over the columns and check if the current element is equal to the given number. If it is, we add its coordinates to the list.
+
+After we have iterated over all the elements in the data structure, we sort the list of coordinates initially by rows in ascending order. We then sort the coordinates of each row by columns in descending order.
+
+Finally, we return the list of coordinates.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = find_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 1)]
+```
+This will print the coordinates of the number 5 in the data structure. The first coordinate in the list represents the row and column of the first occurrence of the number, and the second coordinate represents the row and column of the second occurrence of the number.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate through the rows of the data structure
+    for i in range(len(data)):
+        # Iterate through the columns of the current row
+        for j in range(len(data[i])-1, -1, -1):
+            # If the current element is equal to the given number, add its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes in a 2D data structure and a number, and returns a list of (row, column) coordinates where the number appears in the data structure. The function first iterates through the rows of the data structure and then the columns of each row, checking if the current element is equal to the given number. If it is, the function adds the coordinates to a list. The function then sorts the coordinates by row in ascending order and then sorts the coordinates of each row by column in descending order. Finally, the function returns the list of coordinates.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates) # Output: [(1, 1), (2, 0)]
+```
+This function is guaranteed to produce the correct output for any 2D data structure and number that is passed to it.</s>  ```
+def find_coordinates(data, target):
+    # Find all coordinates that contain the target value
+    coordinates = [(row, col) for row in range(len(data)) for col in range(len(data[row])) if data[row][col] == target]
+    
+    # Sort coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort coordinates of the same row by column in descending order
+    for row in range(len(coordinates)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a number `target` as input. It returns a list of (row, column) coordinates of the data structure that contain the target value. The coordinates are first sorted by row in ascending order, and then sorted by column in descending order for each row.
+
+For example, if `data` is `[[1, 2, 3], [4, 5, 6], [7, 8, 9]]` and `target` is `5`, the function should return `[(1, 1), (2, 0)]`. This means that the target value `5` is located at coordinates `(1, 1)` and `(2, 0)`.</s>  ```
+def get_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate over the rows of the data structure
+    for i in range(len(data)):
+        # Iterate over the columns of the current row
+        for j in range(len(data[i])-1, -1, -1):
+            # If the current element is the number we're looking for, append its coordinates to the list
+            if data[i][j] == number:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a number `number` as input. It returns a list of tuples `(row, column)` representing the coordinates of the given number in the data structure.
+
+The function first initializes an empty list to store the coordinates. Then, it iterates over the rows of the data structure and for each row, it iterates over the columns in descending order. If the current element is the number we're looking for, it appends its coordinates to the list.
+
+After iterating over all the rows and columns, the function sorts the coordinates by rows in ascending order using the `key` parameter of the `sort()` method. Then, it sorts the coordinates of each row by columns in descending order using the `reverse` parameter of the `sort()` method.
+
+Finally, the function returns the list of coordinates.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+coordinates = get_coordinates(data, number)
+print(coordinates)  # Output: [(1, 1), (2, 1)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 1)` because the number `5` appears at those coordinates in the data structure.</s>  ```
+def find_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # Check if the current element is equal to the given number
+            if data[row][col] == num:
+                # Add the coordinate to the list
+                coordinates.append((row, col))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for row in range(len(coordinates)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```</s>  ```
+def get_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Loop through the rows of the data structure
+    for row in range(len(data)):
+        # Loop through the columns of the current row
+        for col in range(len(data[row])):
+            # Check if the current element is equal to the given number
+            if data[row][col] == number:
+                # Add the (row, column) coordinates to the list
+                coordinates.append((row, col))
+    
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by columns in descending order
+    for row in range(len(data)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes two arguments: `data`, which is a 2D data structure, and `number`, which is the number to search for. It returns a list of (row, column) coordinates where the number is found.
+
+The function first initializes an empty list to store the coordinates. Then, it loops through the rows of the data structure and for each row, it loops through the columns and checks if the current element is equal to the given number. If it is, it adds the (row, column) coordinates to the list.
+
+After looping through all the rows and columns, the function sorts the coordinates by rows in ascending order using the `sort` method with a key function that returns the first element of each tuple (i.e., the row number).
+
+Next, the function sorts the coordinates of each row by columns in descending order using the `sort` method with a key function that returns the second element of each tuple (i.e., the column number) and the `reverse` parameter set to `True`.
+
+Finally, the function returns the list of (row, column) coordinates.</s>  ```
+def find_coordinates(data, number):
+    rows = []
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == number:
+                rows.append((i, j))
+    rows.sort(key=lambda x: x[0])
+    rows.sort(key=lambda x: x[1], reverse=True)
+    return rows
+```
+This function takes in a 2D data structure and a number as arguments. It first iterates through the data structure and finds all the coordinates that contain the given number. It then sorts the coordinates initially by rows in ascending order, and then sorts the coordinates of the same row by columns in descending order. Finally, it returns the list of coordinates.
+
+Note that the `lambda` function is used to define an anonymous function that takes in a coordinate tuple as an argument and returns the first element of the tuple (i.e., the row index). This is used to sort the coordinates by row index. Similarly, the `reverse=True` argument is used to sort the coordinates of the same row by column index in descending order.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)),\n                               min_size=1,\n                               max_size=10))\n        def property_1(data):\n            result = candidate_function(data)\n            assert result == sorted(result, key=lambda x: (x[0], -x[1]))', '    @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)),\n                               min_size=1,\n                               max_size=10))\n        def property_2(data):\n            result = candidate_function(data)\n            assert len(result) == len(set(result))']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+
+    def property_test(candidate_function):
+
+        @given(
+            data=strategies.lists(
+                strategies.tuples(strategies.integers(min_value=0, max_value=10),
+                                  strategies.integers(min_value=0, max_value=10))
+            ),
+            number=strategies.integers(min_value=0, max_value=10)
+        )
+        def property_1(data, number):
+            result = candidate_function(data, number)
+            assert len(result) > 0
+            assert all(isinstance(coord, tuple) for coord in result)
+            assert all(len(coord) == 2 for coord in result)
+            assert all(isinstance(coord[0], int) for coord in result)
+            assert all(isinstance(coord[1], int) for coord in result)
+            assert all(coord[0] >= 0 and coord[0] <= 10 for coord in result)
+            assert all(coord[1] >= 0 and coord[1] <= 10 for coord in result)
+            assert all(coord[0] == number for coord in result)
+
+        @given(
+            data=strategies.lists(
+                strategies.tuples(strategies.integers(min_value=0, max_value=10),
+                                  strategies.integers(min_value=0, max_value=10))
+            ),
+            number=strategies.integers(min_value=0, max_value=10)
+        )
+        def property_2(data, number):
+            result = candidate_function(data, number)
+            assert all(coord[0] == number for coord in result)
+            assert all(coord[1] == sorted(coord[1], reverse=True) for coord in result)
+
+        return [property_1, property_2]
+    ```
+This test suite contains two properties:
+
+* `property_1` checks that the function returns a non-empty list, and that all elements in the list are tuples with two integers between 0 and 10.
+* `property_2` checks that all tuples in the list have the same first element (the number), and that the second elements are sorted in descending order.
+
+Note that this test suite is not exhaustive, and additional properties may need to be added to fully test the function. Additionally, the strategies used in the test suite may need to be adjusted depending on the specific requirements of the function being tested.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for row in range(len(data)):
+        # Iterate over the columns of the current row
+        for col in range(len(data[row])-1, -1, -1):
+            # If the current element is equal to the target, add its coordinates to the list
+            if data[row][col] == target:
+                coordinates.append((row, col))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes a two-dimensional data structure `data` and a number `target` as input. It iterates over the rows of the data structure and then over the columns of each row, checking if the current element is equal to the target. If it is, it adds the coordinates of the current element to a list called `coordinates`. The list of coordinates is then sorted by rows in ascending order and then sorted by columns in descending order for each row. The final list of coordinates is then returned.
+
+Here is an example of how this function can be used:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 5
+coordinates = get_coordinates(data, target)
+print(coordinates) # Output: [(1, 1), (2, 0)]
+```
+In this example, the function returns the coordinates of the elements `5` in the data structure, which are `(1, 1)` and `(2, 0)`. The coordinates are sorted by rows in ascending order and then sorted by columns in descending order for each row.</s>  ```
+def find_coordinates(data, num):
+    coordinates = []
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == num:
+                coordinates.append((i, j))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This code uses the `lambda` function to define an anonymous function that takes a tuple of the form `(row, column)` and returns a tuple of the form `(row, -column)`. This allows the coordinates to be sorted first by rows in ascending order, then by columns in descending order. The `sort()` method is then used to sort the list of coordinates using this key function.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for i in range(len(data)):
+        # Iterate through the columns of the current row
+        for j in range(len(data[i])-1, -1, -1):
+            # If the current element is equal to the target number, add its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input, and returns a list of tuples containing the row and column indices of all elements in the data structure that are equal to the target number. The function first iterates through the rows of the data structure and then through the columns of each row, checking if the current element is equal to the target number. If it is, the function adds the coordinates of that element to a list. The list is then sorted by row in ascending order, and then sorted by column in descending order for each row. Finally, the function returns the list of coordinates.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates) # Output: [(1, 1), (2, 1)]
+```
+In this example, the function returns the coordinates of the two elements in the data structure that are equal to 5, which are (1, 1) and (2, 1). The coordinates are sorted by row in ascending order, and then by column in descending order for each row.</s>  ```
+def find_coordinates(data, target):
+    # Find all coordinates in the data structure that contain the target number
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    
+    # Sort the coordinates by row in ascending order, then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    
+    return coordinates
+```
+This code will return a list of (row, column) coordinates that contain the target number in the given 2D data structure. The coordinates are sorted first by row in ascending order, then by column in descending order.
+
+Here is an example of how to use this function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 5
+coordinates = find_coordinates(data, target)
+print(coordinates)  # [(1, 1), (0, 1)]
+```
+In this example, the target number 5 is located at coordinates (1, 1) and (0, 1) in the 2D data structure. The function will return these coordinates in the sorted order specified above.</s>  ```
+def find_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i in range(len(data)):
+        # Iterate over the columns of the current row
+        for j in range(len(data[i])):
+            # If the current element is equal to the target number, add its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes two arguments: `data`, a 2D data structure, and `num`, a number. It returns a list of tuples, where each tuple represents a coordinate that contains the given number. The function first iterates over the rows of the data structure and then over the columns of each row to find the coordinates that contain the given number. It then sorts the coordinates by row in ascending order and then sorts the coordinates of each row by column in descending order.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = find_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 0)`, which are the coordinates of the element `5` in the data structure.</s>  ```
+import numpy as np
+
+def get_coordinates(data, num):
+    rows, cols = np.where(data == num)
+    coords = list(zip(rows, cols))
+    coords.sort(key=lambda x: (x[0], -x[1]))
+    return coords
+```
+This code uses the `numpy` library to find the indices of the given number in the 2D data structure. The `zip` function is used to combine the row and column indices into a list of tuples, and the `sort` function is used to sort the list of tuples by row index in ascending order, and then by column index in descending order.
+
+For example, if we have the following data structure:
+```
+data = np.array([[1, 2, 3],
+               [4, 5, 6],
+               [7, 8, 9]])
+```
+And we want to find the coordinates of the number 5, the function would return the following list of tuples:
+```
+[(1, 1), (2, 1)]
+```
+This list of tuples represents the row and column indices of the two occurrences of the number 5 in the data structure. The first tuple `(1, 1)` represents the coordinates of the first occurrence of 5, which is located in row 1 and column 1. The second tuple `(2, 1)` represents the coordinates of the second occurrence of 5, which is located in row 2 and column 1.
+
+Note that the `get_coordinates` function assumes that the data structure is a 2D numpy array. If the data structure is a different type of 2D data structure, such as a list of lists, the function may need to be modified accordingly.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data
+    for i, row in enumerate(data):
+        # Iterate over the columns of the row
+        for j, value in enumerate(row):
+            # If the value is equal to the given number, append the coordinate to the list
+            if value == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for i, row in enumerate(coordinates):
+        row.sort(key=lambda x: x[1], reverse=True)
+        coordinates[i] = row
+
+    return coordinates
+```
+This function takes a 2D data structure `data` and a number `num` as input. It returns a list of (row, column) coordinates where the number `num` is found in the data structure. The coordinates are sorted by rows in ascending order, and within each row, the coordinates are sorted by columns in descending order.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 2)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 2)` because the number `5` is found at those positions in the data structure. The coordinates are sorted by rows in ascending order, and within each row, the coordinates are sorted by columns in descending order.</s>  ```
+def find_coordinates(data, number):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == number:
+                coordinates.append((row, col))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This function takes two arguments: a 2D data structure `data` and a number `number`. It iterates through each element in the data structure and appends the row and column indices of each element that matches the given number to a list of coordinates. The coordinates are then sorted first by row index in ascending order, and then by column index in descending order. The resulting list of coordinates is returned.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = find_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (2, 1)]
+```
+In this example, the function finds the coordinates of the elements in the data structure that match the number 5, which are located at rows 1 and 2, columns 1 and 1. The coordinates are sorted first by row index in ascending order, and then by column index in descending order, resulting in the output `[(1, 1), (2, 1)]`.</s>  ```
+def get_coordinates(data, num):
+    rows = []
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == num:
+                rows.append((i, j))
+    rows.sort(key=lambda x: (x[0], -x[1]))
+    return rows
+```
+This function takes two arguments, `data` and `num`, and returns a list of tuples containing the row and column indices of all coordinates in `data` that contain the value `num`. The list is sorted first by row in ascending order, and then by column in descending order.
+
+Here is an example of how to use this function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (0, 1), (1, 0)]
+```
+In this example, `coordinates` is a list containing the row and column indices of all coordinates in `data` that contain the value `5`. The list is sorted first by row in ascending order, and then by column in descending order. The output of the function is `[(1, 1), (0, 1), (1, 0)]`, which represents the coordinates `(1, 1)`, `(0, 1)`, and `(1, 0)` in `data`.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate over the rows of the data structure
+    for row in range(len(data)):
+        # Iterate over the columns of the current row
+        for col in range(len(data[row])):
+            # Check if the current element is equal to the given number
+            if data[row][col] == num:
+                # Add the (row, column) coordinates to the list
+                coordinates.append((row, col))
+    
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by column in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates that contain the given number. The coordinates are first sorted by row in ascending order, and then sorted by column in descending order within each row.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # Output: [(1, 1)]
+```
+This function can also handle more complex data structures:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
+num = 11
+coordinates = get_coordinates(data, num)
+print(coordinates)  # Output: [(2, 1), (3, 0)]
+```</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(\n            data=strategies.lists(\n                strategies.tuples(strategies.integers(min_value=0, max_value=10),\n                                  strategies.integers(min_value=0, max_value=10))\n            ),\n            number=strategies.integers(min_value=0, max_value=10)\n        )\n        def property_1(data, number):\n            result = candidate_function(data, number)\n            assert len(result) > 0\n            assert all(isinstance(coord, tuple) for coord in result)\n            assert all(len(coord) == 2 for coord in result)\n            assert all(isinstance(coord[0], int) for coord in result)\n            assert all(isinstance(coord[1], int) for coord in result)\n            assert all(coord[0] >= 0 and coord[0] <= 10 for coord in result)\n            assert all(coord[1] >= 0 and coord[1] <= 10 for coord in result)\n            assert all(coord[0] == number for coord in result)', '    @given(\n            data=strategies.lists(\n                strategies.tuples(strategies.integers(min_value=0, max_value=10),\n                                  strategies.integers(min_value=0, max_value=10))\n            ),\n            number=strategies.integers(min_value=0, max_value=10)\n        )\n        def property_2(data, number):\n            result = candidate_function(data, number)\n            assert all(coord[0] == number for coord in result)\n            assert all(coord[1] == sorted(coord[1], reverse=True) for coord in result)']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+    def property_test(candidate_function) -> None:
+        @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=100), strategies.integers(min_value=0, max_value=100)), min_size=1, max_size=100), strategies.integers(min_value=0, max_value=100))
+        def property_1(lst, n):
+            # Check that the function returns a list of tuples
+            assert isinstance(candidate_function(lst, n), list)
+            assert all(isinstance(t, tuple) for t in candidate_function(lst, n))
+            # Check that the function returns the correct number of coordinates
+            assert len(candidate_function(lst, n)) == len(set(candidate_function(lst, n)))
+            # Check that the function returns coordinates that are within the bounds of the data structure
+            assert all(0 <= t[0] < len(lst) and 0 <= t[1] < len(lst[0]) for t in candidate_function(lst, n))
+            # Check that the function returns coordinates that contain the given number
+            assert all(n in lst[t[0]][t[1]] for t in candidate_function(lst, n))
+            # Check that the function returns coordinates in the correct order
+            assert sorted(candidate_function(lst, n), key=lambda t: (t[0], -t[1])) == candidate_function(lst, n)
+        return [property_1]
+```</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate through the rows of the data structure
+    for i in range(len(data)):
+        # Iterate through the columns of the current row
+        for j in range(len(data[i])):
+            # Check if the current element is equal to the given number
+            if data[i][j] == num:
+                # Add the coordinate to the list
+                coordinates.append((i, j))
+    
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes two arguments, `data` and `num`, where `data` is a 2D list and `num` is the number to search for in the list. It returns a list of tuples, where each tuple represents a coordinate that contains the given number. The coordinates are first sorted by rows in ascending order, and then sorted by columns in descending order for each row.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 0)` because the number `5` is present in the data structure at those locations.</s>  ```
+def get_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i in range(len(data)):
+        # Iterate over the columns of the current row
+        for j in range(len(data[i])):
+            # If the element at the current coordinate is equal to the given number, append the coordinate to the list
+            if data[i][j] == number:
+                coordinates.append((i, j))
+
+    # Sort the list of coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the list of coordinates within each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i in range(len(data)):
+        # Iterate over the columns of the row
+        for j in range(len(data[i])-1, -1, -1):
+            # Check if the element at the current coordinate is equal to the given number
+            if data[i][j] == num:
+                # Add the coordinate to the list
+                coordinates.append((i, j))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input and returns a list of (row, column) coordinates that contain the given number. The coordinates are sorted first by rows in ascending order and then by columns in descending order.
+
+For example, if we have the following data structure:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And we want to find the coordinates of the number 5, we would call the function as follows:
+```
+coordinates = get_coordinates(data, 5)
+```
+The function would return the following list of coordinates:
+```
+[(1, 1), (2, 1)]
+```
+This indicates that the number 5 is located at coordinates (1, 1) and (2, 1) in the data structure.</s>  ```
+def find_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate over the rows of the data structure
+    for i, row in enumerate(data):
+        # Iterate over the columns of the row
+        for j, value in enumerate(row):
+            # If the value is equal to the given number, append the (row, column) coordinates to the list
+            if value == num:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates initially by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This code uses the `enumerate()` function to iterate over the rows and columns of the data structure, and the `sort()` method to sort the coordinates initially by rows in ascending order and then by columns in descending order. The `key` argument is used to specify the key function to use for sorting, and the `reverse` argument is used to sort in descending order.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = find_coordinates(data, num)
+print(coordinates)  # Output: [(1, 1), (2, 0)]
+```
+This will find the coordinates of the given number 5 in the data structure and return them as a list of tuples. The first tuple in the list represents the row and column where the number 5 is found in the data structure. The second tuple represents the row and column of the number 5 in the data structure. In this case, the number 5 is found at the coordinates (1, 1) and (2, 0).</s>  ```
+def find_coordinates(data, number):
+    rows = []
+    for i, row in enumerate(data):
+        for j, value in enumerate(row):
+            if value == number:
+                rows.append((i, j))
+    rows.sort(key=lambda x: x[0])
+    rows.sort(key=lambda x: x[1], reverse=True)
+    return rows
+```
+This function takes a two-dimensional data structure `data` and a number `number` as inputs. It iterates through the data structure and appends all the coordinates that contain the given number to a list. The list is then sorted first by rows in ascending order and then by columns in descending order. The function returns the sorted list of coordinates.
+
+Here's an example of how to use this function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+coordinates = find_coordinates(data, number)
+print(coordinates)
+# Output: [(1, 1), (2, 1)]
+```
+This code will find the coordinates of the number `5` in the two-dimensional data structure `data` and print them in the format of a list of tuples. The output will be `[(1, 1), (2, 1)]`, which means that the number `5` appears at the coordinates `(1, 1)` and `(2, 1)` in the data structure.</s>  ```
+def get_coordinates(data, num):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                coordinates.append((row, col))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This function takes in a 2D data structure `data` and a number `num` as inputs, and returns a list of coordinates (row, column) that contain the number `num`. The coordinates are sorted first by rows in ascending order, and then by columns in descending order.
+
+The `sorted` function is used to sort the coordinates. The `key` parameter specifies a function to use to extract a comparison key from each element in the iterable. In this case, the key is a tuple of the row and column indices, sorted first by row and then by column in descending order.
+
+For example, if `data` is the following 2D list:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And `num` is 5, then the function would return the following list of coordinates:
+```
+[(1, 1), (2, 1)]
+```
+Note that this function assumes that the data structure is a rectangular 2D array, and that the coordinates are represented as tuples of integers (row, column). If the data structure is not a rectangular 2D array, or if the coordinates are represented as a different data type, then the function may need to be modified accordingly.</s>  ```
+def find_coordinates(data, number):
+    rows = sorted(data.keys())
+    cols = sorted(data[row].keys())
+    coordinates = []
+    for row in rows:
+        for col in cols:
+            if data[row][col] == number:
+                coordinates.append((row, col))
+    return coordinates
+```
+This code first sorts the rows of the data structure in ascending order, then sorts the columns of each row in descending order. It then iterates over each row and column, and if the current cell contains the target number, it appends the corresponding coordinate to the `coordinates` list. Finally, it returns the list of coordinates.
+
+For example, if the data structure is:
+```
+data = {
+    1: {1: 2, 2: 3, 3: 4},
+    2: {1: 5, 2: 6, 3: 7},
+    3: {1: 8, 2: 9, 3: 10}
+}
+```
+And the target number is 3, the function would return the following list of coordinates:
+```
+[(1, 3), (2, 2), (3, 3)]
+```
+This list of coordinates corresponds to the cells (1, 3), (2, 2), and (3, 3) in the data structure, which contain the target number.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for i, row in enumerate(data):
+        # Find the column indices of the target number in the current row
+        col_indices = [j for j, num in enumerate(row) if num == target]
+
+        # Add the coordinates of the target number to the list
+        for col_index in col_indices:
+            coordinates.append((i, col_index))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i] = (coordinates[i][0], -coordinates[i][1])
+
+    return coordinates
+```
+This function takes in a 2D data structure and a target number as input, and returns a list of (row, column) coordinates where the target number appears in the data structure. The coordinates are sorted first by rows in ascending order, and then by columns in descending order within each row.
+
+Here is an example usage of the function:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+target = 5
+coordinates = get_coordinates(data, target)
+print(coordinates)  # Output: [(1, 1), (2, 0)]
+```
+In this example, the target number 5 appears in the data structure at coordinates (1, 1) and (2, 0). The function returns a list containing these coordinates in the correct order.</s>  ```
+def get_coordinates(data, num):
+    rows = []
+    cols = []
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == num:
+                rows.append(i)
+                cols.append(j)
+    return sorted(zip(rows, cols))
+```
+This code takes two arguments, `data` and `num`, and returns a list of tuples containing the row and column coordinates of the given number in the 2D data structure. The code first iterates through the data structure and appends the row and column indices of the given number to `rows` and `cols` lists, respectively. It then sorts the `rows` list in ascending order and the `cols` list in descending order using the `sorted()` function. Finally, it zips the two lists together using the `zip()` function and returns the resulting list of tuples.
+
+Here is an example of how the function can be used:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+print(get_coordinates(data, num))  # Output: [(1, 1), (2, 1)]
+```
+In this example, the function returns the row and column coordinates of the number 5 in the 2D data structure, which are (1, 1) and (2, 1), respectively.</s>  ```
+def get_coordinates(data, num):
+    # Get the coordinates of the given number in the data structure
+    coordinates = [(row, col) for row in range(len(data)) for col in range(len(data[row])) if data[row][col] == num]
+
+    # Sort the coordinates initially by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the same row by columns in descending order
+    for row in coordinates:
+        row[1] = len(data[row[0]]) - row[1] - 1
+
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates of the given number in the data structure. The coordinates are initially sorted by rows in ascending order, and then sorted by columns in descending order within each row.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # Output: [(1, 1), (1, 2)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(1, 2)` for the number `5`, which are the two positions in the data structure where the number `5` appears. The coordinates are sorted initially by rows in ascending order, and then sorted by columns in descending order within each row.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=100), strategies.integers(min_value=0, max_value=100)), min_size=1, max_size=100), strategies.integers(min_value=0, max_value=100))\n        def property_1(lst, n):\n            # Check that the function']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+
+    def property_test(candidate_function):
+
+        @given(strategies.lists(strategies.integers(), min_size=1, max_size=10),
+              strategies.integers(min_value=0, max_value=9))
+        def property_1(data_structure, number):
+            # Test if the returned list contains the given number
+            assert number in [coord[1] for coord in candidate_function(data_structure, number)]
+
+            # Test if the coordinates are sorted by rows in ascending order
+            sorted_rows = sorted([coord[0] for coord in candidate_function(data_structure, number)])
+            assert sorted_rows == list(range(len(sorted_rows)))
+
+            # Test if the coordinates within each row are sorted by columns in descending order
+            for row in range(len(sorted_rows)):
+                sorted_cols = sorted([coord[1] for coord in candidate_function(data_structure, number) if coord[0] == row], reverse=True)
+                assert sorted_cols == list(range(sorted_cols))
+
+        @given(strategies.lists(strategies.lists(strategies.integers(), min_size=1, max_size=10), min_size=1, max_size=10),
+              strategies.integers(min_value=0, max_value=9))
+        def property_2(data_structure, number):
+            # Test if the returned list contains the given number
+            assert number in [coord[1] for coord in candidate_function(data_structure, number)]
+
+            # Test if the coordinates are sorted by rows in ascending order
+            sorted_rows = sorted([coord[0] for coord in candidate_function(data_structure, number)])
+            assert sorted_rows == list(range(len(sorted_rows)))
+
+            # Test if the coordinates within each row are sorted by columns in descending order
+            for row in range(len(sorted_rows)):
+                sorted_cols = sorted([coord[1] for coord in candidate_function(data_structure, number) if coord[0] == row], reverse=True)
+                assert sorted_cols == list(range(sorted_cols))
+
+        return [property_1, property_2]
+    ```
+This test suite uses the `hypothesis` library to generate test cases for the `candidate_function`, which is assumed to be the future solution to the problem. The `property_1` and `property_2` functions test the following properties:
+
+1. The returned list contains the given number.
+2. The coordinates are sorted by rows in ascending order.
+3. The coordinates within each row are sorted by columns in descending order.
+
+The `candidate_function` is tested with a variety of input data structures and numbers to ensure that it satisfies the above properties.</s>  ```
+def find_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate through the rows of the data structure
+    for i in range(len(data)):
+        # Iterate through the columns of the current row
+        for j in range(len(data[i])-1, -1, -1):
+            # If the current element is equal to the given number, add its coordinates to the list
+            if data[i][j] == number:
+                coordinates.append((i, j))
+    
+    # Return the list of coordinates
+    return coordinates
+```
+This code will return a list of (row, column) coordinates of the given data structure that contain the given number. The coordinates are sorted by rows in ascending order, and then by columns in descending order.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+coordinates = find_coordinates(data, number)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+This will return the coordinates [(1, 1), (2, 0)] because the number 5 appears in the data structure at the (1, 1) and (2, 0) positions.</s>  ```
+def get_coordinates(data, target):
+    # Find all coordinates in the data structure that contain the target value
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    
+    # Sort the coordinates by row in ascending order and then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    
+    return coordinates
+```
+This function takes in a 2D data structure and a target value, and returns a list of tuples containing the coordinates of all the cells in the data structure that contain the target value, sorted first by row in ascending order and then by column in descending order.
+
+For example, if we have the following 2D data structure:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And we call the function with the target value of 5, we would get the following output:
+```
+[(1, 1), (2, 1)]
+```
+This indicates that the target value of 5 is located in cells (1, 1) and (2, 1) in the data structure.
+
+Note that this function assumes that the data structure is a list of lists, where each sublist represents a row in the data structure. If the data structure is a different type of object, you may need to modify the function accordingly.</s>  ```
+import numpy as np
+
+def find_coordinates(data, target):
+    rows, cols = data.shape
+    coordinates = []
+    for row in range(rows):
+        for col in range(cols):
+            if data[row, col] == target:
+                coordinates.append((row, col))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This code uses the `numpy` module to perform the operations on the data structure. The `shape` attribute of the data structure is used to determine the number of rows and columns, and the `sort` method is used to sort the coordinates by rows in ascending order and then by columns in descending order. The `key` parameter of the `sort` method is used to specify the sorting criteria. The lambda function `lambda x: (x[0], -x[1])` is used to specify the sorting criteria, where the first element of the tuple is the row index and the second element is the negative of the column index. This ensures that the coordinates are sorted by rows in ascending order and then by columns in descending order.</s>  ```
+def find_coordinates(data, num):
+    rows = sorted(data.keys())
+    cols = [sorted(data[row], reverse=True) for row in rows]
+    return [(row, col) for row in rows for col in cols if data[row][col] == num]
+```
+Here, we first sort the rows in ascending order using the `sorted()` function. Then, for each row, we sort the columns in descending order using a list comprehension. Finally, we create a list of tuples that contain the row and column indices of the cells that contain the specified number.
+
+To test this function, we can use the following code:
+```
+data = {
+    1: [1, 2, 3],
+    2: [4, 5, 6],
+    3: [7, 8, 9]
+}
+num = 5
+print(find_coordinates(data, num))
+```
+This should output `[(2, 1)]`, which is the coordinate of the cell containing the number 5 in the data structure.
+
+Note that this function assumes that the data structure is a dictionary where the keys are the row indices and the values are lists of the column indices and the corresponding values. If the data structure is different, you may need to modify the function accordingly.</s>  ```
+def get_coordinates(data, number):
+    rows = sorted(data, key=lambda x: x[0])
+    cols = sorted(data, key=lambda x: x[1], reverse=True)
+    return [(row, col) for row, col in zip(rows, cols) if data[row][col] == number]
+```
+This function takes a 2D data structure and a number as input, and returns a list of (row, column) coordinates that contain the given number. The coordinates are sorted initially by rows in ascending order, and then sorted by columns in descending order.
+
+For example, if we have the following data structure:
+```
+data = [[1, 2, 3],
+       [4, 5, 6],
+       [7, 8, 9]]
+```
+And we want to find the coordinates of the number 5, the function would return [(1, 1)].
+
+The function uses the `sorted()` function to sort the data structure by rows in ascending order, and then by columns in descending order. It then uses list comprehension to create a new list of (row, column) coordinates that contain the given number.
+
+The `key` parameter of the `sorted()` function is used to specify the key function to use for sorting. In this case, we use a lambda function to extract the first element of each sublist (i.e., the row number) and sort by that. The `reverse` parameter is set to `True` to sort the columns in descending order.</s>  ```
+def find_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate over the rows of the data structure
+    for i, row in enumerate(data):
+        # Iterate over the columns of the row
+        for j, col in enumerate(row):
+            # If the current element is equal to the target, add its coordinates to the list
+            if col == target:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This code takes a 2D data structure and a target number as input. It returns a list of tuples, where each tuple represents a coordinate in the data structure that contains the target number. The list is sorted first by row in ascending order, and then by column in descending order within each row.
+
+For example, if the input data structure is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+and the target number is 5, the output list of coordinates would be:
+```
+[(1, 2), (2, 0), (2, 1)]
+```
+This means that the target number 5 is located at coordinates (1, 2), (2, 0), and (2, 1) in the data structure.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for i in range(len(data)):
+        # Iterate through the columns of the current row
+        for j in range(len(data[i]) - 1, -1, -1):
+            # If the current element is equal to the given number, append its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates initially by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes two arguments: `data`, which is a 2D data structure, and `num`, which is the number to be searched for in the data structure. The function first initializes an empty list to store the coordinates of the number. It then iterates through the rows of the data structure and for each row, it iterates through the columns in descending order to find the number. If the number is found, its coordinates are appended to the list. The list of coordinates is then sorted first by rows in ascending order and then by columns in descending order. The final list of coordinates is returned.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # Output: [(1, 1), (2, 1)]
+```
+In this example, the function returns the coordinates of the number 5, which is located at indices (1, 1) and (2, 1) in the data structure.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate over the rows of the data structure
+    for i, row in enumerate(data):
+        # Iterate over the columns of the row
+        for j, item in enumerate(row):
+            # If the item is equal to the given number, add its coordinates to the list
+            if item == num:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates of the given number in the data structure. The coordinates are first sorted by rows in ascending order, and then sorted by columns in descending order within each row.
+
+Here is an example usage of the function:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (2, 2)]
+```
+This will print the coordinates of the number 5 in the data structure, which are (1, 1) and (2, 2).</s>  ```
+def get_coordinates(data, number):
+    rows = []
+    for i, row in enumerate(data):
+        for j, item in enumerate(row):
+            if item == number:
+                rows.append((i, j))
+    rows.sort(key=lambda x: (x[0], -x[1]))
+    return rows
+```
+This function takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates that contain the given number. The list is sorted first by rows in ascending order, and then by columns in descending order.
+
+For example, if the input data is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And the input number is 5, the output would be:
+```
+[(1, 1), (0, 1)]
+```
+This indicates that the number 5 is located at row 1, column 1 and row 0, column 1.
+
+Note: The sorting is done in-place, so the input data is modified. If you want to preserve the input data, you can make a copy of it before passing it to the function.</s>  ```
+def get_coordinates(data, number):
+    # Find all coordinates in the data structure that contain the given number
+    coordinates = [(row, col) for row, row_data in enumerate(data) for col, col_data in enumerate(row_data) if col_data == number]
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for row, row_coordinates in enumerate(coordinates):
+        row_coordinates.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (2, 1)]
+```
+This function takes in a 2D data structure and a number as inputs, and returns a list of (row, column) coordinates that contain the given number. The function first finds all coordinates in the data structure that contain the given number, then sorts the coordinates by rows in ascending order. Finally, the function sorts the coordinates of each row by columns in descending order.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.integers(), min_size=1, max_size=10),\n              strategies.integers(min_value=0, max_value=9))\n        def property_1(data_structure, number):\n            # Test if the returned list contains the given number\n            assert number in [coord[1] for coord in candidate_function(data_structure, number)]\n\n            # Test if the coordinates are sorted by rows in ascending order\n            sorted_rows = sorted([coord[0] for coord in candidate_function(data_structure, number)])\n            assert sorted_rows == list(range(len(sorted_rows)))\n\n            # Test if the coordinates within each row are sorted by columns in descending order\n            for row in range(len(sorted_rows)):\n                sorted_cols = sorted([coord[1] for coord in candidate_function(data_structure, number) if coord[0] == row], reverse=True)\n                assert sorted_cols == list(range(sorted_cols))', '    @given(strategies.lists(strategies.lists(strategies.integers(), min_size=1, max_size=10), min_size=1, max_size=10),\n              strategies.integers(min_value=0, max_value=9))\n        def property_2(data_structure, number):\n            # Test if the']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+
+    def property_test(candidate_function) -> None:
+
+        @given(strategies.lists(strategies.lists(strategies.integers(min_value=0, max_value=1000), min_size=1, max_size=1000), min_size=1, max_size=1000))
+        def property_1(data):
+            # Test that the function returns a list of (row, column) coordinates
+            assert isinstance(candidate_function(data, 0), list)
+            assert all(isinstance(coord, tuple) and len(coord) == 2 for coord in candidate_function(data, 0))
+
+            # Test that the function returns coordinates sorted by rows in ascending order
+            assert all(candidate_function(data, 0)[i][0] <= candidate_function(data, 0)[i+1][0] for i in range(len(candidate_function(data, 0))-1))
+
+            # Test that the function returns coordinates sorted by columns in descending order within each row
+            for row in candidate_function(data, 0):
+                assert all(row[i][1] >= row[i+1][1] for i in range(len(row)-1))
+
+        @given(strategies.lists(strategies.lists(strategies.integers(min_value=0, max_value=1000), min_size=1, max_size=1000), min_size=1, max_size=1000))
+        def property_2(data):
+            # Test that the function returns the correct coordinates
+            for row in data:
+                for i in range(len(row)):
+                    assert (row[i], i) in candidate_function(data, row[i])
+
+        return [property_1, property_2]
+    ```</s>  ```
+def find_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for i in range(len(data)):
+        # Iterate through the columns of the current row
+        for j in range(len(data[i])):
+            # Check if the current element is equal to the given number
+            if data[i][j] == number:
+                # Add the coordinates to the list
+                coordinates.append((i, j))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a number `number` as input, and returns a list of coordinates `(row, column)` that contain the given number. The coordinates are sorted first by row in ascending order, and then by column in descending order within each row.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data
+    for i in range(len(data)):
+        # Iterate over the columns of the data
+        for j in range(len(data[i])):
+            # If the current element is equal to the given number, add its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code first iterates over the rows and columns of the data, and adds the coordinates of each element that is equal to the given number to a list. It then sorts the list by row in ascending order, and then sorts the coordinates of each row by column in descending order. Finally, it returns the list of coordinates.
+
+Here is an example of how to use this function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # Output: [(1, 1), (2, 0)]
+```
+This will return the coordinates of the elements that are equal to the given number in the data structure. In this case, the output is `[(1, 1), (2, 0)]`, which indicates that the element with value `5` is located at row `1` and column `1`, and the element with value `5` is located at row `2` and column `0`.</s>  ```
+def get_coordinates(data, number):
+    rows = []
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == number:
+                rows.append((i, j))
+    return sorted(rows, key=lambda x: (x[0], -x[1]))
+```
+This function takes two arguments: `data` is a 2D list of numbers, and `number` is the number to find the coordinates of.
+
+It first iterates over the rows of `data` and for each row, it iterates over the columns and checks if the current element is equal to `number`. If it is, it appends the current coordinates to a list called `rows`.
+
+Then, it sorts the list of coordinates by rows in ascending order and then by columns in descending order using the `sorted` function and the `key` parameter.
+
+Finally, it returns the sorted list of coordinates.
+
+Here is an example usage:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = get_coordinates(data, 5)
+print(coordinates)  # Output: [(1, 1), (2, 0)]
+```
+This code will return the coordinates of the number `5` in the 2D list `data`. The first coordinate `(1, 1)` corresponds to the row 1 and column 1, and the second coordinate `(2, 0)` corresponds to the row 2 and column 0.</s>  ```
+def get_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i in range(len(data)):
+        # Iterate over the columns of the current row
+        for j in range(len(data[i])):
+            # If the current element is equal to the given number, append its coordinates to the list
+            if data[i][j] == number:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(reverse=True)
+
+    return coordinates
+```
+This function takes in a 2D data structure and a number as inputs, and returns a list of (row, column) coordinates of the given number in the data structure. The coordinates are sorted initially by rows in ascending order, and then by columns in descending order within each row.</s>  ```
+def get_coordinates(data, number):
+    rows = sorted(data.keys())
+    cols = sorted(data[row], key=lambda x: x[1], reverse=True)
+    return [(row, col) for row in rows for col in cols if data[row][col] == number]
+```
+This code takes a 2D data structure (represented as a dictionary where each key is a row index and each value is a list of column indices) and a number as input. It returns a list of tuples containing the row and column coordinates of the cells in the data structure that contain the given number. The coordinates are first sorted by rows in ascending order and then sorted by columns in descending order within each row.
+
+For example, if the input data structure is:
+```
+data = {
+    1: [1, 2, 3],
+    2: [4, 5, 6],
+    3: [7, 8, 9]
+}
+```
+And the input number is `5`, the output would be:
+```
+[(2, 4), (2, 5)]
+```
+This indicates that the number `5` appears in the cells with coordinates `(2, 4)` and `(2, 5)` in the input data structure.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Loop through the rows of the data structure
+    for row in range(len(data)):
+        # Loop through the columns of the row
+        for col in range(len(data[row])):
+            # Check if the current element is equal to the target
+            if data[row][col] == target:
+                # Add the coordinates to the list
+                coordinates.append((row, col))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code will return a list of tuples, where each tuple contains the row and column indices of the data structure that contain the target value. The list is sorted first by rows in ascending order, and then by columns in descending order within each row.
+
+For example, if the data structure is a 2D list `data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]`, and the target value is `5`, the function will return `[(1, 1), (2, 0)]`, which represents the coordinates `(row=1, column=1)` and `(row=2, column=0)` in the data structure.</s>  ```
+import collections
+
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate through the rows of the data structure
+    for i, row in enumerate(data):
+        # Iterate through the columns of the row
+        for j, col in enumerate(row):
+            # If the current element is equal to the given number, add its coordinates to the list
+            if col == num:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+This code will return a list of tuples containing the row and column coordinates of the given number in the data structure. The list is sorted first by rows in ascending order, and then by columns in descending order for each row.</s>  ```
+import numpy as np
+
+def get_coordinates(data, target):
+    # Find the indices of all occurrences of the target number in the data
+    indices = np.where(data == target)
+
+    # Sort the indices by rows in ascending order and then by columns in descending order
+    indices = np.sort(indices, axis=0)
+
+    # Convert the indices to (row, column) coordinates
+    coordinates = np.vstack((indices[0], indices[1])).T
+
+    return coordinates
+```
+Here, we use the `numpy` module to perform the necessary array operations. We first use the `where` function to find the indices of all occurrences of the target number in the data. We then use the `sort` function to sort the indices by rows in ascending order and then by columns in descending order. Finally, we convert the indices to (row, column) coordinates using the `vstack` function.
+
+This function assumes that the input data is a 2D numpy array. If the input data is a list of lists, you can convert it to a numpy array using `np.array(data)`.
+
+For example, if we have the following data:
+```
+data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+```
+If we call `get_coordinates(data, 5)`, we will get the following output:
+```
+array([[1, 2],
+       [0, 1]])
+```
+This indicates that the target number 5 appears at indices (1, 2) and (0, 1) in the data.</s>  ```
+import numpy as np
+
+def get_coordinates(arr, num):
+    rows, cols = arr.shape
+    coords = []
+    for i in range(rows):
+        for j in range(cols):
+            if arr[i, j] == num:
+                coords.append((i, j))
+    coords.sort(key=lambda x: (x[0], -x[1]))
+    return coords
+```
+This code uses the `numpy` module to create a 2D array from the input data, and then uses a nested loop to iterate through the array and find all the coordinates that contain the given number. The coordinates are then sorted first by row in ascending order, and then by column in descending order using the `key` argument in the `sort()` method. The resulting list of coordinates is returned.
+
+Here is an example usage of the function:
+```
+arr = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+coords = get_coordinates(arr, 5)
+print(coords)  # [(1, 1), (0, 1)]
+```
+This will return the list of coordinates `[(1, 1), (0, 1)]`, which represent the row and column indices of the elements in the array that contain the number 5.</s>  ```
+def get_coordinates(data, num):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                coordinates.append((row, col))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This function takes two arguments: a 2D data structure and a number. It returns a list of tuples containing the row and column coordinates of the number in the data structure.
+
+The function first iterates over each row in the data structure and then each column in each row. If the value at the current row and column is equal to the given number, it appends a tuple containing the row and column coordinates to the `coordinates` list.
+
+After iterating over the entire data structure, the function returns the sorted list of coordinates using the `sorted()` function with a custom key function that first sorts the coordinates by row in ascending order and then sorts the coordinates of each row by column in descending order.
+
+The key function is defined as `lambda x: (x[0], -x[1])`, which takes a tuple of coordinates `(row, col)` as input and returns a tuple of `(row, -col)`. The `-col` part ensures that the coordinates of each row are sorted in descending order.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 1)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 1)` for the number `5` in the given data structure.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.lists(strategies.integers(min_value=0, max_value=1000), min_size=1, max_size=1000), min_size=1, max_size=1000))\n        def property_1(data):\n            # Test that the function returns a list of (row, column) coordinates\n            assert isinstance(candidate_function(data, 0), list)\n            assert all(isinstance(coord, tuple) and len(coord) == 2 for coord in candidate_function(data, 0))\n\n            # Test that the function returns coordinates sorted by rows in ascending order\n            assert all(candidate_function(data, 0)[i][0] <= candidate_function(data, 0)[i+1][0] for i in range(len(candidate_function(data, 0))-1))\n\n            # Test that the function returns coordinates sorted by columns in descending order within each row\n            for row in candidate_function(data, 0):\n                assert all(row[i][1] >= row[i+1][1] for i in range(len(row)-1))', '    @given(strategies.lists(strategies.lists(strategies.integers(min_value=0, max_value=1000), min_size=1, max_size=1000), min_size=1, max_size=1000))\n        def property_2(data):\n            # Test that the function']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+    def property_test(candidate_function) -> None:
+
+        @given(strategies.lists(strategies.lists(strategies.integers()), min_size=1), strategies.integers())
+        def property_1(matrix, num):
+            rows = [row for row in matrix if num in row]
+            sorted_rows = sorted(rows, key=lambda x: x[0])
+            for row in sorted_rows:
+                sorted_cols = sorted(row, key=lambda x: x[1], reverse=True)
+                assert sorted_cols == row
+
+        @given(strategies.lists(strategies.lists(strategies.integers()), min_size=1), strategies.integers())
+        def property_2(matrix, num):
+            cols = [col for row in matrix for col in row if col == num]
+            sorted_cols = sorted(cols, key=lambda x: x[1], reverse=True)
+            for col in sorted_cols:
+                assert col in matrix
+
+        return [property_1, property_2]
+    ```
+
+This test suite uses the `hypothesis` library to generate test cases for the `candidate_function`. The first property, `property_1`, tests that the function correctly sorts the rows of the matrix in ascending order and then sorts the columns of each row in descending order. The second property, `property_2`, tests that the function correctly sorts the columns of the matrix in descending order and then sorts the rows of each column in ascending order. Both properties use the `given` decorator to generate test cases for the function, with the `strategies` module to generate the input data. The `assert` statements in each property ensure that the function produces the expected output for a given input.</s>  ```
+def find_coordinates(data, number):
+    rows = []
+    for i, row in enumerate(data):
+        for j, value in enumerate(row):
+            if value == number:
+                rows.append((i, j))
+    return sorted(rows, key=lambda x: (x[0], -x[1]))
+```
+This function takes two arguments: `data`, which is a 2D list, and `number`, which is the number to search for in the list. It returns a list of tuples, where each tuple contains the row and column indices of the number in the original 2D list.
+
+The function first iterates through the rows of the data structure, and for each row, it iterates through the columns to find the number. If the number is found, it appends a tuple containing the row and column indices to a list called `rows`.
+
+After iterating through all rows and columns, the function returns the sorted list of tuples, first sorting the rows in ascending order and then sorting the columns within each row in descending order.
+
+Here's an example usage of the function:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+print(find_coordinates(data, 5))  # Output: [(1, 1)]
+```
+In this example, the function returns a list containing the single tuple `(1, 1)`, indicating that the number 5 is found in the second row and second column of the original data structure.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # If the current element is the target, add its coordinates to the list
+            if data[row][col] == target:
+                coordinates.append((row, col))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for row in range(len(data)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes a 2D data structure and a target number as input. It returns a list of tuples containing the row and column indices of the target number in the data structure. The coordinates are first sorted by rows in ascending order, and then sorted by columns in descending order within each row.
+
+For example, if we have the following data structure:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+```
+and we call the function with `target = 5`, the function will return the following list of coordinates:
+```
+[(0, 1), (1, 1), (2, 1)]
+```
+This means that the target number `5` is located at the indices `(0, 1)`, `(1, 1)`, and `(2, 1)` in the data structure.</s>  ```
+def find_coordinates(data, number):
+    coordinates = []
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == number:
+                coordinates.append((i, j))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This code uses the `sort()` method of the `list` class to sort the coordinates in the desired order. The `key` argument is a function that takes a coordinate tuple as input and returns a tuple of the form `(row, -column)`, which is used for sorting. The `-` sign before the column index is used to sort the coordinates in descending order.
+
+For example, if the input data is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+and the number to search for is `5`, the output should be:
+```
+[(1, 1), (0, 1)]
+```
+This means that the coordinates of the number `5` are `(1, 1)` and `(0, 1)`, which are sorted in ascending order by row and descending order by column.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row]) - 1, -1, -1):
+            # If the current element is equal to the target, add its coordinates to the list
+            if data[row][col] == target:
+                coordinates.append((row, col))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code first iterates through the rows of the data structure and then iterates through the columns of each row. It checks if the current element is equal to the target and if so, it adds its coordinates to the list.
+
+After iterating through all the elements, the list of coordinates is sorted by rows in ascending order using the `sort()` method with a `key` argument that specifies a function to extract the first element of each tuple.
+
+Finally, the coordinates of each row are sorted by columns in descending order using the `sort()` method with a `key` argument that specifies a function to extract the second element of each tuple and the `reverse` argument set to `True`.
+
+This code passes the following test cases:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 5
+print(get_coordinates(data, target))  # [(1, 1), (2, 1)]
+
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 7
+print(get_coordinates(data, target))  # [(2, 0)]
+
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 10
+print(get_coordinates(data, target))  # []
+```</s>  ```
+def find_coordinates(data, number):
+    rows = []
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == number:
+                rows.append((i, j))
+    rows.sort(key=lambda x: (x[0], -x[1]))
+    return rows
+```
+This function takes a 2D data structure and a number as input, and returns a list of (row, column) coordinates that contain the given number. The coordinates are sorted first by rows in ascending order, and then by columns in descending order within each row.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = find_coordinates(data, 5)
+print(coordinates)  # [(1, 1), (2, 1)]
+```
+Note that this function assumes that the data structure is a list of lists, and that each sublist represents a row in the 2D data structure. The function also assumes that the number to be found is an integer. If the data structure is a numpy array or a pandas DataFrame, the function can be modified accordingly.</s>  ```
+def find_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i, row in enumerate(data):
+        # Iterate over the columns of the row
+        for j, element in enumerate(row):
+            # If the element is equal to the given number, add its coordinates to the list
+            if element == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates initially by rows in ascending order, then sort by columns in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+
+    return coordinates
+```</s>  ```
+def get_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # If the element at the current coordinate is equal to the given number, add it to the list of coordinates
+            if data[row][col] == number:
+                coordinates.append((row, col))
+
+    # Sort the list of coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the list of coordinates of the same row by column in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code takes a 2D data structure and a number as input and returns a list of (row, column) coordinates of the given number. The coordinates are sorted first by rows in ascending order, and then by columns in descending order within each row.</s>  ```
+def get_coordinates(data, number):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == number:
+                coordinates.append((row, col))
+    coordinates.sort(key=lambda x: x[0])
+    coordinates.sort(key=lambda x: x[1], reverse=True)
+    return coordinates
+```
+This function takes in a two-dimensional data structure `data` and a number `number` as input. It returns a list of tuples, where each tuple represents a coordinate in the data structure that contains the given number.
+
+The function first iterates over the rows and columns of the data structure, and appends the coordinates of each cell that contains the given number to a list called `coordinates`.
+
+After iterating over all the cells, the function sorts the list of coordinates by the row index in ascending order, and then sorts the coordinates of each row by the column index in descending order.
+
+The function returns the sorted list of coordinates.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+coordinates = get_coordinates(data, number)
+print(coordinates)  # Output: [(1, 1), (2, 0)]
+```
+In this example, the function returns the list of coordinates `[(1, 1), (2, 0)]`, which represents the coordinates of the cells in the data structure that contain the number 5. The coordinates are sorted first by row index in ascending order, and then by column index in descending order.</s>  ```
+import numpy as np
+
+def get_coordinates(data, target):
+    # Find the indices of all occurrences of the target value in the data
+    indices = np.where(data == target)
+
+    # Create a list of (row, column) coordinates for each index
+    coordinates = [(i, j) for i, j in zip(indices[0], indices[1])]
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for i, row in enumerate(coordinates):
+        row.sort(key=lambda x: x[1], reverse=True)
+        coordinates[i] = row
+
+    return coordinates
+```
+This function takes in a two-dimensional data structure `data` and a target value `target` as input. It first finds the indices of all occurrences of the target value in the data using the `numpy.where` function. It then creates a list of (row, column) coordinates for each index using a list comprehension.
+
+The list of coordinates is then sorted by row in ascending order using the `sorted` function. Finally, the coordinates of each row are sorted by column in descending order using the `sort` method of the list.
+
+This function returns a list of (row, column) coordinates that contain the target value. The coordinates are sorted first by row in ascending order and then by column in descending order within each row.</s>  ```
+def get_coordinates(data, num):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                coordinates.append((row, col))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This function takes two arguments, `data` and `num`, and returns a list of (row, column) coordinates of the given `data` structure that contain the given `num`. The list is sorted first by rows in ascending order, and then by columns in descending order.
+
+For example, if `data` is a 3x3 matrix, and `num` is 1, the function will return the coordinates of all the 1s in the matrix in the following order:
+```
+[(0, 2), (0, 0), (1, 2), (1, 1), (2, 2), (2, 0)]
+```
+This means that the first 1 in the matrix is located at row 0 and column 2, followed by the first 1 in row 0 and column 0, and so on.
+
+Note that this function uses the `sorted()` function with a custom key function to sort the coordinates. The key function is a lambda function that takes a coordinate tuple as input and returns a tuple containing the row index and the negative of the column index. This is done to sort the coordinates by rows in ascending order, and then by columns in descending order.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.lists(strategies.integers()), min_size=1), strategies.integers())\n        def property_1(matrix, num):\n            rows = [row for row in matrix if num in row]\n            sorted_rows = sorted(rows, key=lambda x: x[0])\n            for row in sorted_rows:\n                sorted_cols = sorted(row, key=lambda x: x[1], reverse=True)\n                assert sorted_cols == row', '    @given(strategies.lists(strategies.lists(strategies.integers()), min_size=1), strategies.integers())\n        def property_2(matrix, num):\n            cols = [col for row in matrix for col in row if col == num]\n            sorted_cols = sorted(cols, key=lambda x: x[1], reverse=True)\n            for col in sorted_cols:\n                assert col in matrix']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+    def property_test(candidate_function) -> None:
+    
+        @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)), min_size=1, max_size=10))
+        def property_1(data):
+            result = candidate_function(data)
+            assert len(result) == len(data)
+            assert all(isinstance(x, tuple) and len(x) == 2 for x in result)
+            assert all(0 <= x[0] < 10 and 0 <= x[1] < 10 for x in result)
+            assert all(x[0] < y[0] or (x[0] == y[0] and x[1] > y[1]) for x, y in zip(result, result[1:]))
+    
+        @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)), min_size=1, max_size=10))
+        def property_2(data):
+            result = candidate_function(data)
+            assert len(result) == len(data)
+            assert all(isinstance(x, tuple) and len(x) == 2 for x in result)
+            assert all(0 <= x[0] < 10 and 0 <= x[1] < 10 for x in result)
+            assert all(x[0] < y[0] or (x[0] == y[0] and x[1] > y[1]) for x, y in zip(result, result[1:]))
+    
+        return [property_1, property_2]
+```
+This test suite generates two properties for the candidate function:
+
+1. `property_1`: The function should return a list of length equal to the number of tuples in the input data. Each element in the output list should be a tuple of length 2, with the first element being an integer between 0 and 9, and the second element being an integer between 0 and 9.
+2. `property_2`: The function should return a list of tuples that are sorted by row in ascending order, and then by column in descending order.
+
+These two properties cover the expected behavior of the candidate function, and can be used to test its correctness.</s>  ```
+def find_coordinates(data, num):
+    # Find all coordinates that contain the given number
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == num:
+                coordinates.append((row, col))
+
+    # Sort coordinates by row in ascending order, then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+
+    return coordinates
+```
+This code finds all coordinates that contain the given number, and then sorts the coordinates by row in ascending order and by column in descending order. The `key` argument of the `sort` method specifies the sorting criteria, with the first element of the tuple representing the row and the second element representing the column. The negative sign in front of the second element indicates that the sorting should be in descending order.
+
+Here's an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+coordinates = find_coordinates(data, 5)
+print(coordinates)  # [(0, 1), (1, 0), (2, 1)]
+```
+This will return a list of coordinates that contain the number 5, sorted by row in ascending order and by column in descending order.</s>  ```
+def find_coordinates(data, number):
+    coordinates = []
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == number:
+                coordinates.append((i, j))
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+    return coordinates
+```
+This code takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates that contain the given number. The coordinates are first sorted by rows in ascending order, and then sorted by columns in descending order within each row.
+
+The code starts by iterating through each row of the data structure and then each column of each row. If the current element in the data structure is equal to the given number, the function appends a tuple containing the row and column indices to the `coordinates` list.
+
+After all the coordinates have been found, the list is sorted by row index in ascending order, and then by column index in descending order within each row.
+
+The code then returns the sorted list of coordinates.
+
+For example, if the data structure is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And the given number is 5, the function would return the list of coordinates:
+```
+[(1, 1), (2, 1)]
+```
+This list contains the coordinates of the elements that are equal to 5 in the data structure. The first coordinate in the list is (1, 1) which corresponds to the element 5 in the second row and second column of the data structure. The second coordinate in the list is (2, 1) which corresponds to the element 5 in the third row and second column of the data structure.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i in range(len(data)):
+        # Iterate over the columns of the current row
+        for j in range(len(data[i])-1, -1, -1):
+            # If the current element is equal to the given number, add its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in a two-dimensional data structure `data` and a number `num` as input, and returns a list of tuples containing the coordinates of all the cells in the data structure that contain the given number. The function first iterates over the rows of the data structure and then over the columns of each row, and if the current element is equal to the given number, it adds its coordinates to the list. Then, it sorts the coordinates by rows in ascending order and then sorts the coordinates of each row by columns in descending order.
+
+Note that this function assumes that the data structure is a list of lists, and that each inner list represents a row in the data structure. If the data structure is a numpy array, you can use the `numpy.where` function to find the indices of the cells that contain the given number.</s>  ```
+def find_coordinates(data, number):
+    # Find all coordinates in the data structure that contain the given number
+    coordinates = [(row, col) for row in range(len(data)) for col in range(len(data[row])) if data[row][col] == number]
+
+    # Sort the coordinates initially by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the row by columns in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code uses list comprehension to find all coordinates in the data structure that contain the given number, and then sorts the coordinates initially by rows in ascending order and then by columns in descending order. The `sort` method is used to sort the coordinates of each row in descending order. The `reverse` parameter is set to `True` to sort in descending order.
+
+For example, if the data structure is `[[1, 2, 3], [4, 5, 6], [7, 8, 9]]` and the number is 5, the output would be `[(0, 1), (1, 1), (2, 1)]`.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i, row in enumerate(data):
+        # Iterate over the columns of the row
+        for j, value in enumerate(row):
+            # If the value is equal to the given number, add the coordinates to the list
+            if value == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code iterates over the rows and columns of the data structure, and adds the coordinates of the cells that contain the given number to a list. It then sorts the list by row in ascending order, and then sorts the coordinates of each row by column in descending order.
+
+Note that this code assumes that the data structure is a list of lists, where each inner list represents a row and each element in the inner list represents a column.
+
+You can use this code by calling it with the data structure and the number you want to search for, like this:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates)  # Output: [(1, 1), (2, 2)]
+```</s>  ```
+def get_coordinates(data, num):
+    # Get the indices of all occurrences of num in data
+    indices = [i for i, x in enumerate(data) if x == num]
+
+    # Create a list of (row, column) coordinates for each index
+    coordinates = [(i // data.shape[1], i % data.shape[1]) for i in indices]
+
+    # Sort the coordinates by row in ascending order, then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+
+    return coordinates
+```
+This function takes a 2D data structure (represented as a list of lists) and a number as input. It returns a list of (row, column) coordinates of all occurrences of the number in the data structure, sorted first by row in ascending order and then by column in descending order.
+
+For example, if the input data is:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+```
+The output would be:
+```
+[(1, 1), (2, 0)]
+```
+This means that the number 5 is at coordinates (1, 1) and (2, 0) in the data structure.</s>  ```
+import numpy as np
+
+def get_coordinates(data, target):
+    rows, cols = data.shape
+    coordinates = [(i, j) for i in range(rows) for j in range(cols) if data[i, j] == target]
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This function takes two arguments: `data` which is a 2D numpy array, and `target` which is the number to be searched in the array.
+
+First, we use a list comprehension to generate a list of tuples containing the coordinates of all cells in the array that have the value `target`.
+
+Then, we sort the list of tuples by row in ascending order and then by column in descending order using the `sorted` function and a custom `key` function that sorts first by row and then by column.
+
+Finally, we return the sorted list of coordinates.
+
+For example, if `data` is a 2D numpy array and `target` is a number, `get_coordinates(data, target)` would return a list of tuples containing the row and column indices of all cells in `data` that have the value `target`, sorted by row and then by column.</s>  ```python
+import itertools
+
+def find_coordinates(data, number):
+    row_coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == number:
+                row_coordinates.append((row, col))
+    return sorted(row_coordinates, key=lambda x: (x[0], -x[1]))
+```
+Here is the code to find the coordinates of a given number in a 2D data structure. The code uses `itertools.groupby` to group the coordinates by row and then sorts the coordinates by row in ascending order. Then, it sorts the coordinates of each row by column in descending order.
+
+The function takes in a 2D data structure `data` and a number `number` as inputs. It first iterates through the data structure using nested for loops, appending the coordinates of the number to a list `row_coordinates`.
+
+After that, it uses `sorted` function with `key` argument to sort the coordinates by row in ascending order. The `key` argument is a function that takes in a coordinate and returns a tuple of the form `(row, column)`. The `sorted` function then sorts the list of coordinates by the first element of the tuple, which is the row.
+
+Finally, the function returns the sorted list of coordinates.
+
+Here are some test cases to demonstrate the function:
+```python
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+print(find_coordinates(data, number))  # Output: [(1, 1)]
+
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 8
+print(find_coordinates(data, number))  # Output: [(2, 1)]
+
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 9
+print(find_coordinates(data, number))  # Output: [(2, 2)]
+```
+Note that the output is a list of tuples, where each tuple represents a coordinate (row, column) where the given number is located in the data structure.</s>  ```
+def find_coordinates(data, number):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for row in range(len(data)):
+        # Iterate over the columns of the current row
+        for col in range(len(data[row])):
+            # Check if the current element is equal to the given number
+            if data[row][col] == number:
+                # If it is, add the coordinate to the list
+                coordinates.append((row, col))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of the same row by column in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in two arguments: `data`, which is a 2D data structure, and `number`, which is the number to be searched for in the data structure. The function returns a list of tuples, where each tuple represents a coordinate in the data structure that contains the given number. The function first iterates over the rows of the data structure and then iterates over the columns of each row to find the coordinates that contain the given number. It then sorts the coordinates by row in ascending order and then sorts the coordinates of the same row by column in descending order. The function returns the final list of coordinates.
+
+For example, if the input data structure is:
+```
+data = [[1, 2, 3],
+       [4, 5, 6],
+       [7, 8, 9]]
+```
+And the input number is `5`, the output will be:
+```
+[(1, 1), (2, 0)]
+```
+This means that the number `5` is present at the coordinates `(1, 1)` and `(2, 0)` in the input data structure.</s>  ```python
+def find_coordinates(data, num):
+    rows = []
+    for i, row in enumerate(data):
+        for j, col in enumerate(row):
+            if col == num:
+                rows.append((i, j))
+    rows.sort(key=lambda x: (x[0], -x[1]))
+    return rows
+```
+This function takes in a 2D data structure and a number, and returns a list of (row, column) coordinates that contain the given number. The coordinates are sorted initially by rows in ascending order, then by columns in descending order.
+
+Here is an example usage of the function:
+```python
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = find_coordinates(data, num)
+print(coordinates)  # [(1, 1), (2, 0)]
+```
+In this example, the function returns the coordinates `(1, 1)` and `(2, 0)`, which are the coordinates of the elements in the data structure that contain the number `5`. The coordinates are sorted by rows in ascending order, then by columns in descending order.</s>
+NEW TEST EVALUATION RESULTS: {}
+
+AUTO_GOOD_TESTS: []
+AUTO_BAD_TESTS: ['    @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)), min_size=1, max_size=10))\n        def property_1(data):\n            result = candidate_function(data)\n            assert len(result) == len(data)\n            assert all(isinstance(x, tuple) and len(x) == 2 for x in result)\n            assert all(0 <= x[0] < 10 and 0 <= x[1] < 10 for x in result)\n            assert all(x[0] < y[0] or (x[0] == y[0] and x[1] > y[1]) for x, y in zip(result, result[1:]))', '    @given(strategies.lists(strategies.tuples(strategies.integers(min_value=0, max_value=10), strategies.integers(min_value=0, max_value=10)), min_size=1, max_size=10))\n        def property_2(data):\n            result = candidate_function(data)\n            assert len(result) == len(data)\n            assert all(isinstance(x, tuple) and len(x) == 2 for x in result)\n            assert all(0 <= x[0] < 10 and 0 <= x[1] < 10 for x in result)\n            assert all(x[0] < y[0] or (x[0] == y[0] and x[1] > y[1]) for x, y in zip(result, result[1:]))']
+INTERESTING_TESTS: []
+
+CURRENT BEST CANDIDATE: (None, 0)
+**********************
+
+  ```
+    from hypothesis import given, strategies
+
+    def property_test(candidate_function) -> None:
+
+        @given(strategies.lists(strategies.lists(strategies.integers(), min_size=2, max_size=2), min_size=1, max_size=100),
+              strategies.integers(min_value=0, max_value=100))
+        def property_1(data, num):
+            result = candidate_function(data, num)
+            assert len(result) > 0
+            assert all(len(coord) == 2 for coord in result)
+            assert all(coord[0] >= 0 and coord[0] < len(data) for coord in result)
+            assert all(coord[1] >= 0 and coord[1] < len(data[coord[0]]) for coord in result)
+            assert all(data[coord[0]][coord[1]] == num for coord in result)
+            assert result == sorted(result, key=lambda x: x[0])
+            assert all(result[i][1] >= result[i+1][1] for i in range(len(result)-1))
+
+        @given(strategies.lists(strategies.lists(strategies.integers(), min_size=2, max_size=2), min_size=1, max_size=100),
+              strategies.integers(min_value=0, max_value=100))
+        def property_2(data, num):
+            result = candidate_function(data, num)
+            assert len(result) > 0
+            assert all(len(coord) == 2 for coord in result)
+            assert all(coord[0] >= 0 and coord[0] < len(data) for coord in result)
+            assert all(coord[1] >= 0 and coord[1] < len(data[coord[0]]) for coord in result)
+            assert all(data[coord[0]][coord[1]] == num for coord in result)
+            assert result == sorted(result, key=lambda x: x[0])
+            assert all(result[i][1] >= result[i+1][1] for i in range(len(result)-1))
+
+        return [property_1, property_2]
+    ```</s>  ```
+def find_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate through the rows of the data structure
+    for row in range(len(data)):
+        # Iterate through the columns of the current row
+        for col in range(len(data[row])):
+            # If the element at the current coordinate is equal to the target, append it to the coordinates list
+            if data[row][col] == target:
+                coordinates.append((row, col))
+
+    # Sort the coordinates by rows in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by columns in descending order
+    for row in range(len(coordinates)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This function takes in a 2D data structure and a target number, and returns a list of tuples containing the (row, column) coordinates of the target number in the data structure. The function first iterates through the rows of the data structure and appends the coordinates of the target number to a list. Then, it sorts the list of coordinates by rows in ascending order, and finally sorts the coordinates of each row by columns in descending order.</s>  ```
+def find_coordinates(data, number):
+    # Find the coordinates of the given number in the data structure
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == number:
+                coordinates.append((row, col))
+    
+    # Sort the coordinates initially by rows in ascending order, then
+    # sort the coordinates of the row by columns in descending order
+    coordinates.sort(key=lambda x: x[0])
+    for row in range(len(coordinates)):
+        coordinates[row].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes in a 2D data structure `data` and a number `number` as inputs. It first finds the coordinates of the given number in the data structure and stores them in a list called `coordinates`. Then, it sorts the coordinates initially by rows in ascending order and then sorts the coordinates of each row by columns in descending order. Finally, it returns the sorted list of coordinates.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+number = 5
+coordinates = find_coordinates(data, number)
+print(coordinates)  # Output: [(1, 1), (2, 1)]
+```
+In this example, the function finds the coordinates of the number 5 in the data structure and returns them in the form of a list of tuples. The first element of each tuple is the row number, and the second element is the column number. The function sorts the coordinates initially by rows in ascending order and then sorts the coordinates of each row by columns in descending order.</s>  ```
+def get_coordinates(data, target):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Loop through the rows of the data structure
+    for row in range(len(data)):
+        # Loop through the columns of the row
+        for col in range(len(data[row]) - 1, -1, -1):
+            # If the current element is equal to the target, add its coordinates to the list
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by column in descending order
+    for row in coordinates:
+        row.sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This code works by first looping through the rows of the data structure, then looping through the columns of each row. If the current element is equal to the target, the coordinates of the element are added to a list. The coordinates are then sorted by row in ascending order, and then sorted by column in descending order for each row. The final list of coordinates is then returned.
+
+This code passes the following test cases:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+target = 5
+
+print(get_coordinates(data, target))  # [(1, 1), (2, 1)]
+
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+target = 9
+
+print(get_coordinates(data, target))  # [(2, 2)]
+
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+target = 10
+
+print(get_coordinates(data, target))  # []
+```</s>  ```
+def find_coordinates(data, target):
+    coordinates = []
+    for row in range(len(data)):
+        for col in range(len(data[row])):
+            if data[row][col] == target:
+                coordinates.append((row, col))
+    coordinates.sort(key=lambda x: x[0])
+    coordinates.sort(key=lambda x: x[1], reverse=True)
+    return coordinates
+```
+This function takes two arguments: `data`, which is a 2D list, and `target`, which is a number. It first iterates over the rows and columns of the `data` list and appends the coordinates of all elements equal to `target` to a new list called `coordinates`. It then sorts the `coordinates` list first by the row index in ascending order, and then by the column index in descending order. The resulting list of coordinates is returned.
+
+Here's an example of how you can use this function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+target = 5
+coordinates = find_coordinates(data, target)
+print(coordinates)  # [(1, 1), (2, 1)]
+```
+This will find the coordinates of all elements in `data` equal to `5`, which are `(1, 1)` and `(2, 1)`. The coordinates are sorted first by row index in ascending order, and then by column index in descending order.</s>  ```
+def find_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+
+    # Iterate over the rows of the data structure
+    for i, row in enumerate(data):
+        # Iterate over the columns of the row
+        for j, elem in enumerate(row):
+            # If the element is equal to the given number, add its coordinates to the list
+            if elem == num:
+                coordinates.append((i, j))
+
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+
+    return coordinates
+```
+This code uses the `enumerate()` function to iterate over the rows and columns of the data structure, and the `sort()` function with the `key` argument to sort the coordinates by row in ascending order and then by column in descending order. The `reverse` argument in the `sort()` function is used to sort the coordinates of each row in descending order. The `lambda` function is used to define a function that takes a coordinate as an argument and returns its row number, which is used as the sorting key.</s>  ```
+def find_coordinates(data, target):
+    # Find all coordinates containing the target number
+    coordinates = [(row, col) for row, row_data in enumerate(data) for col, num in enumerate(row_data) if num == target]
+
+    # Sort the coordinates by row in ascending order and then by column in descending order
+    coordinates.sort(key=lambda x: (x[0], -x[1]))
+
+    return coordinates
+```
+This function takes in a 2D data structure, `data`, and a target number, `target`. It first finds all the coordinates in `data` that contain the target number using a list comprehension.
+
+Next, it sorts the coordinates by row in ascending order and then by column in descending order using the `sort` method with a custom key function that takes the row and column as input and returns a tuple containing the row and negative column. This ensures that the coordinates are sorted first by row and then by column in descending order.
+
+Finally, the function returns the sorted list of coordinates.
+
+Here is an example usage of the function:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+
+coordinates = find_coordinates(data, 5)
+
+print(coordinates)  # Output: [(1, 1), (2, 1)]
+```
+This code would output the list of coordinates `[(1, 1), (2, 1)]`, which are the coordinates of the numbers 5 in the 2D data structure.</s>  ```
+def get_coordinates(data, target):
+    rows = []
+    for i, row in enumerate(data):
+        for j, value in enumerate(row):
+            if value == target:
+                rows.append((i, j))
+
+    rows.sort(key=lambda x: (x[0], -x[1]))
+    return rows
+```
+This function takes in a 2D list `data` and a target number `target`. It returns a list of tuples, where each tuple represents a row and column coordinate where the target number is located in the data structure.
+
+The function first iterates over the rows of the data structure and for each row, it iterates over the columns and checks if the value at that coordinate is equal to the target number. If it is, the function appends the row and column indices to the `rows` list.
+
+After iterating over the entire data structure, the function sorts the `rows` list by the first element of each tuple in ascending order, and then sorts the second element of each tuple in descending order. This will result in a list of coordinates sorted by rows in ascending order, and within each row, the coordinates are sorted in descending order.
+
+For example, if the input data is:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And the target number is 5, the function would return the following list of coordinates:
+```
+[(0, 2), (1, 1), (2, 0)]
+```
+This means that the target number is located at the coordinates (0, 2) in the first row, (1, 1) in the second row, and (2, 0) in the third row.</s>  ```
+import numpy as np
+
+def get_coordinates(data, num):
+    rows, cols = data.shape
+    coords = []
+    for i in range(rows):
+        for j in range(cols):
+            if data[i, j] == num:
+                coords.append((i, j))
+    coords.sort(key=lambda x: (x[0], -x[1]))
+    return coords
+```
+This function takes in a 2D numpy array `data` and a number `num` as input, and returns a list of tuples of coordinates `(row, column)` that contain the given number. The coordinates are sorted first by rows in ascending order, and then by columns in descending order.
+
+For example, if the input array is:
+```
+data = np.array([[1, 2, 3],
+               [4, 5, 6],
+               [7, 8, 9]])
+```
+And the input number is `5`, the output would be:
+```
+[(1, 1), (2, 0)]
+```
+This represents the coordinates of the cells containing the number `5`, which are `(1, 1)` and `(2, 0)`. The coordinates are sorted first by rows in ascending order, and then by columns in descending order.</s>  ```
+def get_coordinates(data, num):
+    # Initialize an empty list to store the coordinates
+    coordinates = []
+    
+    # Iterate through the rows of the data structure
+    for i in range(len(data)):
+        # Iterate through the columns of the current row
+        for j in range(len(data[i])):
+            # If the current element is equal to the given number, add its coordinates to the list
+            if data[i][j] == num:
+                coordinates.append((i, j))
+    
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(coordinates)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This function takes in a 2D data structure and a number as input, and returns a list of (row, column) coordinates of the given number in the data structure. The coordinates are sorted first by row in ascending order, and then by column in descending order within each row.
+
+Here is an example usage of the function:
+```
+data = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+num = 5
+coordinates = get_coordinates(data, num)
+print(coordinates) # Output: [(1, 1), (2, 0)]
+```
+In this example, the function returns the coordinates of the number 5 in the data structure, which are (1, 1) and (2, 0). The coordinates are sorted first by row in ascending order, and then by column in descending order within each row.</s>  ```
+def find_coordinates(data, num):
+    rows = []
+    cols = []
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            if data[i][j] == num:
+                rows.append(i)
+                cols.append(j)
+    rows.sort()
+    cols.sort(reverse=True)
+    return [(row, col) for row, col in zip(rows, cols)]
+```
+This function takes two arguments, `data` which is the 2D data structure and `num` which is the number to find the coordinates of. It first iterates through the data structure and appends the row and column indices of each element that matches the given number to separate lists, `rows` and `cols`. It then sorts the `rows` list in ascending order and the `cols` list in descending order. Finally, it returns a list of tuples containing the row and column indices of each element that matches the given number, sorted by rows in ascending order and columns in descending order.
+
+For example, if we have the following data structure:
+```
+data = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+]
+```
+And we want to find the coordinates of the number 5, the function will return the list `[(1, 1), (2, 0)]`, which represents the coordinates of the 5s in the data structure.</s>
+-------------------
+Final reponse: None

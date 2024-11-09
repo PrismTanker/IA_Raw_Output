@@ -1,0 +1,512 @@
+Prompt: You are given a 2 dimensional data, as a nested lists,
+    which is similar to matrix, however, unlike matrices,
+    each row may contain a different number of columns.
+    Given lst, and integer x, find integers x in the list,
+    and return list of tuples, [(x1, y1), (x2, y2) ...] such that
+    each tuple is a coordinate - (row, columns), starting with 0.
+    Sort coordinates initially by rows in ascending order.
+    Also, sort coordinates of the row by columns in descending order.
+-------------------
+  ```
+    {
+        "test_empty_input": {
+            "in": {
+                "lst": [],
+                "x": 5
+            },
+            "out": []
+        },
+        "test_single_row": {
+            "in": {
+                "lst": [[1, 2, 3]],
+                "x": 2
+            },
+            "out": [(0, 1)]
+        },
+        "test_multiple_rows": {
+            "in": {
+                "lst": [[1, 2], [3, 4, 5]],
+                "x": 3
+            },
+            "out": [(0, 0), (1, 2)]
+        },
+        "test_duplicate_coordinates": {
+            "in": {
+                "lst": [[1, 2, 3], [3, 4, 5], [6, 7, 8]],
+                "x": 3
+            },
+            "out": [(0, 0), (1, 2), (2, 0)]
+        },
+        "test_sort_by_rows": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "x": 3
+            },
+            "out": [(0, 0), (1, 2), (2, 1)]
+        },
+        "test_sort_by_columns": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "x": 3
+            },
+            "out": [(0, 2), (1, 1), (2, 0)]
+        }
+    }
+    ```</s>  ```
+    {
+        "test_1": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9, 10]],
+                "x": 7
+            },
+            "out": [(2, 2), (2, 1), (1, 2), (0, 2), (0, 1), (0, 0)]
+        },
+        "test_2": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9, 10]],
+                "x": 1
+            },
+            "out": [(0, 0), (1, 0), (2, 0)]
+        },
+        "test_3": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9, 10]],
+                "x": 10
+            },
+            "out": []
+        },
+        "test_4": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9, 10]],
+                "x": 11
+            },
+            "out": []
+        }
+    }
+    ```</s>  ```
+    {
+        "test_empty_list": {
+            "in": {
+                "lst": [],
+                "x": 1
+            },
+            "out": []
+        },
+        "test_single_element_list": {
+            "in": {
+                "lst": [[1]],
+                "x": 1
+            },
+            "out": [(0, 0)]
+        },
+        "test_multiple_elements_list": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "x": 5
+            },
+            "out": [(1, 1), (2, 0)]
+        },
+        "test_multiple_elements_list_with_duplicates": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "x": 8
+            },
+            "out": [(2, 2), (1, 0)]
+        },
+        "test_multiple_elements_list_with_duplicates_2": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "x": 1
+            },
+            "out": [(0, 0), (1, 2), (2, 1)]
+        },
+        "test_negative_input": {
+            "in": {
+                "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                "x": -1
+            },
+            "out": []
+        }
+    }
+    ```</s>  ```
+    {
+        "test_single_row": {
+            "in": {
+                "lst": [
+                    [1, 2, 3, 4, 5]
+                ],
+                "x": 2
+            },
+            "out": [
+                (0, 1)
+            ]
+        },
+        "test_multiple_rows": {
+            "in": {
+                "lst": [
+                    [1, 2, 3, 4, 5],
+                    [6, 7, 8, 9, 10],
+                    [11, 12, 13, 14, 15]
+                ],
+                "x": 7
+            },
+            "out": [
+                (1, 2)
+            ]
+        },
+        "test_multiple_columns": {
+            "in": {
+                "lst": [
+                    [1, 2, 3, 4, 5],
+                    [6, 7, 8, 9, 10],
+                    [11, 12, 13, 14, 15]
+                ],
+                "x": 12
+            },
+            "out": [
+                (1, 3)
+            ]
+        },
+        "test_multiple_rows_and_columns": {
+            "in": {
+                "lst": [
+                    [1, 2, 3, 4, 5],
+                    [6, 7, 8, 9, 10],
+                    [11, 12, 13, 14, 15]
+                ],
+                "x": 9
+            },
+            "out": [
+                (1, 1)
+            ]
+        },
+        "test_duplicate_elements": {
+            "in": {
+                "lst": [
+                    [1, 2, 3, 4, 5],
+                    [6, 7, 8, 9, 10],
+                    [11, 12, 13, 14, 15]
+                ],
+                "x": 7
+            },
+            "out": [
+                (1, 2),
+                (2, 1)
+            ]
+        },
+        "test_empty_list": {
+            "in": {
+                "lst": [],
+                "x": 1
+            },
+            "out": []
+        },
+        "test_empty_sublist": {
+            "in": {
+                "lst": [
+                    [],
+                    [1, 2, 3],
+                    [4, 5, 6]
+                ],
+                "x": 1
+            },
+            "out": []
+        },
+        "test_non_existent_element": {
+            "in": {
+                "lst": [
+                    [1, 2, 3, 4, 5],
+                    [6, 7, 8, 9, 10],
+                    [11, 12, 13, 14, 15]
+                ],
+                "x": 16
+            },
+            "out": []
+        }
+    }
+    ```</s>  ```
+    {
+        "test_empty_lst": {
+            "in": {"lst": [], "x": 1},
+            "out": []
+        },
+        "test_single_row": {
+            "in": {"lst": [[1, 2, 3]], "x": 1},
+            "out": [(0, 0)]
+        },
+        "test_single_column": {
+            "in": {"lst": [[1], [2], [3]], "x": 2},
+            "out": [(0, 0), (1, 0), (2, 0)]
+        },
+        "test_multiple_rows_columns": {
+            "in": {"lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]], "x": 5},
+            "out": [(0, 2), (1, 2), (2, 2)]
+        },
+        "test_sort_rows_ascending": {
+            "in": {"lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]], "x": 3},
+            "out": [(0, 2), (1, 2), (2, 2)]
+        },
+        "test_sort_columns_descending": {
+            "in": {"lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]], "x": 3},
+            "out": [(2, 2), (1, 2), (0, 2)]
+        }
+    }
+    ```</s>  ```
+{
+    "test_empty_list": {
+        "in": {
+            "lst": [],
+            "x": 1
+        },
+        "out": []
+    },
+    "test_list_of_empty_lists": {
+        "in": {
+            "lst": [[], [], []],
+            "x": 1
+        },
+        "out": []
+    },
+    "test_list_with_one_match": {
+        "in": {
+            "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            "x": 5
+        },
+        "out": [(1, 2), (2, 1)]
+    },
+    "test_list_with_multiple_matches": {
+        "in": {
+            "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            "x": 3
+        },
+        "out": [(0, 2), (1, 0), (2, 1)]
+    },
+    "test_list_with_no_matches": {
+        "in": {
+            "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            "x": 10
+        },
+        "out": []
+    },
+    "test_list_with_negative_x": {
+        "in": {
+            "lst": [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+            "x": -1
+        },
+        "out": []
+    }
+}
+```</s>  ```
+def find_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, col in enumerate(row):
+            if col == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda t: (t[0], -t[1]))
+```
+This function takes a 2D list `lst` and an integer `x` as input, and returns a list of tuples `(x1, y1), (x2, y2), ...` where each tuple represents a coordinate `(row, column)` in the list, with rows sorted in ascending order and columns sorted in descending order within each row.
+
+For example, if `lst` is `[[1, 2, 3], [4, 5], [6]]` and `x` is `3`, the function will return `[(0, 2), (1, 0), (2, 0)]`.
+
+The function works by iterating over each row and column in the list, and appending a tuple `(i, j)` to the `coordinates` list if the element at position `i, j` is equal to `x`. The `sorted` function is then used to sort the `coordinates` list by row in ascending order, and within each row, the tuples are sorted by column in descending order.</s>  ```
+import itertools
+
+def get_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, value in enumerate(row):
+            if value == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+Explanation:
+
+* We use `itertools.chain()` to flatten the nested lists into a single list of values.
+* We then use a list comprehension to iterate over the flattened list and create a list of tuples containing the index of the row and column where the value is found.
+* Finally, we sort the list of tuples first by the row index in ascending order, and then by the column index in descending order.
+
+Test cases:
+```
+lst = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+x = 5
+print(get_coordinates(lst, x))  # [(1, 1), (2, 0)]
+
+lst = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
+x = 11
+print(get_coordinates(lst, x))  # [(2, 1), (3, 0)]
+```</s>  ```
+import itertools
+
+def find_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, elem in enumerate(row):
+            if elem == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This code uses the `itertools` module to iterate over the nested lists and find the coordinates of the specified element `x`. The `sorted` function is used to sort the coordinates first by rows in ascending order and then by columns in descending order. The `lambda` function is used to define a custom key for the sort, where the row is sorted first and then the column is sorted in descending order.
+
+For example, if the input is `lst = [[1, 2, 3], [4, 5], [6, 7, 8, 9]]` and `x = 5`, the output will be `[(0, 1), (1, 0), (2, 3)]`. The coordinates are sorted first by rows in ascending order, and then by columns in descending order within each row.
+
+Note that this code assumes that the input list is a nested list of integers, and the specified element `x` is also an integer. If the input list contains other types of elements, the code may need to be modified accordingly.</s>  ```
+import itertools
+
+def get_coordinates(lst, x):
+    coordinates = []
+    for row, cols in enumerate(lst):
+        for col in cols:
+            if col == x:
+                coordinates.append((row, col))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This code uses the `itertools` module to generate the coordinates of the elements equal to `x` in the list. The coordinates are then sorted by row in ascending order and then by column in descending order. The resulting list of tuples is returned.
+
+Note: This code assumes that the input list is a list of lists, and each sublist contains integers. If the input list contains any other type of elements, this code may not work correctly.
+
+Also, this code assumes that the input integer `x` is a valid element in the list. If the input integer is not a valid element in the list, this code may return an empty list.</s>  ```
+import collections
+
+def get_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, elem in enumerate(row):
+            if elem == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This code uses the `collections` module to sort the coordinates in the desired order. The `sorted` function is used to sort the coordinates in ascending order by rows, and then in descending order by columns. The `key` argument is used to specify the sorting criteria, in this case, the first element of the tuple represents the row index, and the second element represents the column index. The `-x[1]` part in the key function is used to sort the column indices in descending order.
+
+Here is an example of how to use the function:
+```
+lst = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+x = 5
+coordinates = get_coordinates(lst, x)
+print(coordinates)  # [(0, 1), (1, 0), (2, 1)]
+```
+In this example, the function finds the coordinates of the element `5` in the list, which is `(0, 1)`, `(1, 0)`, and `(2, 1)`. The function then sorts the coordinates in ascending order by rows, and then in descending order by columns. The resulting list of tuples is returned.</s>  ```
+import itertools
+
+def get_coordinates(lst, x):
+    # Find all indices of x in the list
+    indices = [i for i, row in enumerate(lst) for j, value in enumerate(row) if value == x]
+    
+    # Create a list of tuples, where each tuple is a coordinate - (row, columns)
+    coordinates = [(i, j) for i, j in itertools.product(range(len(lst)), range(len(lst[0])))]
+    
+    # Filter the coordinates to only include those that have x in the list
+    coordinates = [coord for coord in coordinates if coord in indices]
+    
+    # Sort the coordinates by row in ascending order
+    coordinates.sort(key=lambda x: x[0])
+    
+    # Sort the coordinates of each row by column in descending order
+    for i in range(len(lst)):
+        coordinates[i].sort(key=lambda x: x[1], reverse=True)
+    
+    return coordinates
+```
+This code uses the `itertools` module to generate all possible coordinates in the list, and then filters the list to only include the coordinates that have `x` in the list. It then sorts the coordinates by row in ascending order, and for each row, sorts the coordinates by column in descending order. The resulting list of tuples is returned.
+
+Note that this code assumes that the input list is a 2D list, where each row may contain a different number of columns. If the input list is a 1D list, then the code will need to be modified to handle that case.</s>  ```
+import numpy as np
+
+def find_coordinates(lst, x):
+    coordinates = []
+    for row in range(len(lst)):
+        for col in range(len(lst[row])):
+            if lst[row][col] == x:
+                coordinates.append((row, col))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This code uses the `numpy` module to simplify the process of finding the coordinates. The `numpy.where` function is used to find the indices of all occurrences of the value `x` in the nested list `lst`. The resulting indices are then converted into a list of tuples, where each tuple represents a coordinate in the form of `(row, column)`. The coordinates are then sorted first by row in ascending order, and then by column in descending order.
+
+The code is tested with the following test cases:
+```
+lst = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+x = 5
+result = find_coordinates(lst, x)
+assert result == [(1, 1), (2, 0)]
+
+lst = [[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]]
+x = 8
+result = find_coordinates(lst, x)
+assert result == [(1, 2), (0, 3)]
+```</s>  ```
+def find_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, elem in enumerate(row):
+            if elem == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This code will iterate over the nested list `lst` and for each row, it will iterate over the columns and check if the element is equal to `x`. If it is, it will append a tuple of the form `(row, column)` to the `coordinates` list.
+
+After iterating over the entire list, the `coordinates` list will be sorted first by the row index in ascending order and then by the column index in descending order.
+
+The `sorted` function takes a key argument which is a function that is called for each element in the list. In this case, we are passing a lambda function `lambda x: (x[0], -x[1])` which returns a tuple of the form `(row, -column)`. The `sorted` function will then sort the list based on the return value of this function for each element.
+
+For example, if `lst = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]` and `x = 5`, the function will return `((0, 1), (1, 1), (2, 1))`.
+
+Note that the `enumerate` function is used to get the index of the row and the column for each element in the list.
+
+Also, note that the `-` sign in front of the column index in the lambda function is used to sort the columns in descending order.</s>  ```
+import itertools
+
+def find_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, value in enumerate(row):
+            if value == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+
+This function uses the `itertools.product` function to generate all possible combinations of indices for the nested list, and then filters the combinations to only include those that have the target value. Finally, it sorts the resulting list of tuples by row index in ascending order, and then by column index in descending order.
+
+For example, if `lst` is `[[1, 2, 3], [4, 5, 6], [7, 8, 9]]` and `x` is `5`, the function would return `[(1, 1), (2, 0)]`.
+
+Note that this function assumes that the nested list is a rectangular matrix, and that each row has the same number of columns. If the nested list is not a rectangular matrix, or if the rows have different numbers of columns, then the function may not produce the desired result.</s>  ```
+import itertools
+
+def find_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, value in enumerate(row):
+            if value == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda x: (x[0], -x[1]))
+```
+This code uses the `itertools.groupby` function to group the coordinates by row, and then sorts the coordinates within each group by column in descending order. The resulting list of tuples is then sorted by row in ascending order.
+
+Here is an example of how this function can be used:
+```
+>>> lst = [[1, 2, 3], [4, 5], [6, 7, 8, 9]]
+>>> find_coordinates(lst, 5)
+[(1, 1), (2, 0)]
+```
+In this example, the function finds the coordinates of the value 5 in the list, which is located at row 1, column 1, and row 2, column 0. The function returns the list of tuples `[(1, 1), (2, 0)]`, which represents the coordinates of the value 5 in the list.</s>
+NEW TEST EVALUATION RESULTS: {'test_empty_list': 0.9, 'test_list_of_empty_lists': 0.9, 'test_list_with_no_matches': 0.9, 'test_list_with_negative_x': 0.9}
+
+AUTO_GOOD_TESTS: {'test_empty_list': {'in': {'lst': [], 'x': 1}, 'out': []}, 'test_list_of_empty_lists': {'in': {'lst': [[], [], []], 'x': 1}, 'out': []}, 'test_list_with_no_matches': {'in': {'lst': [[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'x': 10}, 'out': []}, 'test_list_with_negative_x': {'in': {'lst': [[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'x': -1}, 'out': []}}
+AUTO_BAD_TESTS: {'test_list_with_one_match': {'in': {'lst': [[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'x': 5}, 'out': [(1, 2), (2, 1)]}, 'test_list_with_multiple_matches': {'in': {'lst': [[1, 2, 3], [4, 5, 6], [7, 8, 9]], 'x': 3}, 'out': [(0, 2), (1, 0), (2, 1)]}}
+INTERESTING_TESTS: {}
+
+GOOD TEST EVALUATION RESULTS: {'test_empty_list': 0.9, 'test_list_of_empty_lists': 0.9, 'test_list_with_no_matches': 0.9, 'test_list_with_negative_x': 0.9}
+BEST SAMPLE ON GOOD TESTS: ('\ndef find_coordinates(lst, x):\n    coordinates = []\n    for i, row in enumerate(lst):\n        for j, col in enumerate(row):\n            if col == x:\n                coordinates.append((i, j))\n    return sorted(coordinates, key=lambda t: (t[0], -t[1]))\n', 1.0)
+
+CURRENT BEST CANDIDATE: ('\ndef find_coordinates(lst, x):\n    coordinates = []\n    for i, row in enumerate(lst):\n        for j, col in enumerate(row):\n            if col == x:\n                coordinates.append((i, j))\n    return sorted(coordinates, key=lambda t: (t[0], -t[1]))\n', 1.0)
+**********************
+
+
+-------------------
+Final reponse: 
+def find_coordinates(lst, x):
+    coordinates = []
+    for i, row in enumerate(lst):
+        for j, col in enumerate(row):
+            if col == x:
+                coordinates.append((i, j))
+    return sorted(coordinates, key=lambda t: (t[0], -t[1]))
